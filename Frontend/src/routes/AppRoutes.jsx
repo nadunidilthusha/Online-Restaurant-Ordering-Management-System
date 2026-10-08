@@ -21,6 +21,7 @@ import ChefManagementPage from '../admin/pages/ChefManagement/ChefManagementPage
 import AddChefPage from '../admin/pages/ChefManagement/AddChefPage';
 import EditChefPage from '../admin/pages/ChefManagement/EditChefPage';
 import MenuManagementPage from '../admin/pages/MenuManagement/MenuManagementPage';
+import EditMenuPage from '../admin/pages/MenuManagement/EditMenuPage'; // <-- Added new import
 import OrderManagementPage from '../admin/pages/OrderManagement/OrderManagementPage';
 import ContactManagementPage from '../admin/pages/ContactManagement/ContactManagementPage';
 import ImageManagementPage from '../admin/pages/ImageManagement/ImageManagementPage';
@@ -50,6 +51,7 @@ export default function AppRoutes() {
           <Route path="chefs/new" element={<AddChefPage />} />
           <Route path="chefs/:id/edit" element={<EditChefPage />} />
           <Route path="menu" element={<MenuManagementPage />} />
+          <Route path="menu/:id/edit" element={<EditMenuPage />} /> {/* <-- Added new route */}
           <Route path="orders" element={<OrderManagementPage />} />
           <Route path="contact" element={<ContactManagementPage />} />
           <Route path="images" element={<ImageManagementPage />} />

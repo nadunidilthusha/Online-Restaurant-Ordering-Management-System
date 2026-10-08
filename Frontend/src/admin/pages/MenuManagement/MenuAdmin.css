@@ -1,0 +1,240 @@
+/* src/admin/pages/MenuManagement/MenuAdmin.css */
+
+/* --- PAGE BACKGROUND & LAYOUT --- */
+.menu-admin-page {
+  background-color: #f5f3f0 !important; /* Soft gray/cream background */
+  min-height: calc(100vh - 80px);
+  margin: -2rem; /* Negate global admin-content padding */
+  padding: 2.5rem 3.5rem 120px 3.5rem;
+  color: #2c2c2c !important;
+}
+
+.admin-page-header {
+  margin-bottom: 32px;
+}
+
+.admin-page-header h1 {
+  font-family: var(--serif);
+  font-size: 2.2rem !important;
+  color: #1a050a !important; 
+  margin-bottom: 8px !important;
+  font-weight: 500 !important;
+}
+
+.admin-page-header p {
+  color: #8c8c8c !important;
+  font-size: 0.95rem !important;
+  font-family: var(--sans);
+}
+
+/* --- CARD STYLING (FIXED PADDING) --- */
+.menu-admin-page .admin-card {
+  background: #ffffff !important;
+  border: 1px solid #ebebeb !important; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important; 
+  border-radius: 8px !important;
+  padding: 40px !important; /* Increased padding to push fields away from edges */
+  margin-bottom: 32px !important;
+}
+
+.admin-card-title {
+  font-family: var(--serif);
+  font-size: 1.35rem !important;
+  color: #1a050a !important;
+  margin-bottom: 32px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  font-weight: 500 !important;
+}
+
+/* --- FORM FIELDS & SPACING (FIXED BLENDING) --- */
+.menu-admin-page .field {
+  margin-bottom: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-admin-page .field label, 
+.menu-admin-page label {
+  color: #888888 !important; /* Subtle gray */
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 10px !important;
+  font-family: var(--sans) !important;
+  display: block;
+}
+
+.menu-admin-page .input {
+  background-color: #ffffff !important;
+  border: 1px solid #d4d4d4 !important; /* Darker border so it's visible against white card */
+  border-radius: 6px !important;
+  padding: 12px 16px !important; /* Thicker padding inside input */
+  color: #333333 !important;
+  font-family: var(--sans) !important;
+  font-size: 0.95rem !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important; /* Tiny shadow to pop off the page */
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.menu-admin-page .input:focus {
+  border-color: var(--gold) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 106, 0.15) !important;
+}
+
+.menu-admin-page .input::placeholder {
+  color: #c4c4c4 !important;
+}
+
+/* --- GRID LAYOUTS (FIXED GAPS) --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 32px !important; /* Bigger gap between columns */
+  margin-bottom: 32px !important;
+}
+
+.form-grid-2-col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 48px !important; /* Wide gap between Description and Image */
+}
+
+@media (max-width: 900px) {
+  .form-grid-2-col { grid-template-columns: 1fr; gap: 32px !important; }
+}
+
+/* --- IMAGE UPLOAD BOXES --- */
+.image-upload-box {
+  border: 1px dashed #b8b8b8 !important; /* Visible dashed border */
+  border-radius: 6px !important;
+  background-color: #fafafa !important; /* Slight gray to stand out from white card */
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-upload-box:hover {
+  border-color: var(--gold) !important;
+  background-color: #ffffff !important;
+}
+
+/* --- TOGGLE SWITCH --- */
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e5e0d8; 
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input:checked + .slider { background-color: #4ade80; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* --- ADMIN DATA TABLE --- */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: var(--sans);
+}
+
+.admin-table th {
+  color: #999999 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase;
+  font-weight: 600 !important;
+  padding: 16px !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  letter-spacing: 0.5px;
+}
+
+.admin-table td {
+  padding: 20px 16px !important;
+  border-bottom: 1px solid #f7f7f7 !important;
+  font-size: 0.95rem !important;
+  color: #555555 !important;
+}
+
+.status-badge {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.action-link {
+  color: var(--wine) !important;
+  text-decoration: none;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+}
+.action-link:hover { text-decoration: underline; }
+
+/* --- STICKY BOTTOM ACTION BAR --- */
+.sticky-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 260px; /* Offset for sidebar */
+  right: 0;
+  background: #1a050a !important;
+  padding: 20px 48px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #f5f2eb !important;
+  z-index: 100;
+  font-family: var(--sans);
+}
+
+@media (max-width: 900px) { .sticky-bottom-bar { left: 0; } }
+
+.sticky-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.sticky-bottom-bar .btn-outline {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+}
+
+.sticky-bottom-bar .btn-primary {
+  background: var(--gold) !important;
+  color: #000000 !important;
+  border: none !important;
+}
