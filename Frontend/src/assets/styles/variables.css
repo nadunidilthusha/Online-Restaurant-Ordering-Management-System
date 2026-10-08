@@ -1,0 +1,17 @@
+:root {
+  --night: #0d0a0b;
+  --burg: #2a0b13;
+  --wine: #8c1d2f;
+  --ivory: #f8f3ea;
+  --gold: #d4af6a;
+  --gold-2: #ecd5a1;
+  --saffron: #d98a3d;
+  --emerald: #3f7f6b;
+  --danger: #c2410c;
+  --ink: #1f1a1a;
+  --muted: #b3a8a3;
+  --line: rgba(212, 175, 106, 0.3);
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Jost', system-ui, sans-serif;
+  --frame: 1438px;
+}
