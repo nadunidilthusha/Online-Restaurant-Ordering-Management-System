@@ -1,0 +1,156 @@
+/* src/assets/styles/Menu.css */
+
+.menu-page {
+  background: var(--ivory);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 100px 20px 140px;
+}
+
+.menu-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header & Categories */
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 60px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .menu-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+}
+
+.menu-title-area h1 {
+  font-family: var(--serif);
+  font-size: 3rem;
+  color: var(--burg);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.menu-title-area p {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.categories-wrapper {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid rgba(212, 175, 106, 0.4);
+  padding: 8px 24px;
+  border-radius: 30px;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-btn.active, .category-btn:hover {
+  background: var(--wine);
+  color: #fff;
+  border-color: var(--wine);
+}
+
+/* Food Cards Grid */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 40px;
+}
+
+/* Individual Food Card */
+.food-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered animations */
+.food-card:nth-child(1) { animation-delay: 0.1s; }
+.food-card:nth-child(2) { animation-delay: 0.2s; }
+.food-card:nth-child(3) { animation-delay: 0.3s; }
+.food-card:nth-child(4) { animation-delay: 0.4s; }
+.food-card:nth-child(5) { animation-delay: 0.5s; }
+.food-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Arched Image Layout */
+.food-image {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 150px 150px 0 0;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.food-name {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  color: var(--burg);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.food-desc {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+/* Price & Add Button Row */
+.food-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.food-price {
+  color: var(--gold);
+  font-size: 1.1rem;
+  font-family: var(--sans);
+  font-weight: 400;
+}
+
+.add-btn {
+  background: var(--gold);
+  color: var(--burg);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1);
+}
