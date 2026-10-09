@@ -1,8 +1,4 @@
-export default function Toast() {
-  return (
-    <section className="container page">
-      <h1>Toast</h1>
-      <p>TODO: build this component.</p>
-    </section>
-  );
+export default function Toast({ message }) {
+  if (!message) return null;
+  return <div className={`toast show ${message.type}`} role="status">{message.text}</div>;
 }
