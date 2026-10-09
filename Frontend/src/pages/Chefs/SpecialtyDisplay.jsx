@@ -1,13 +1,8 @@
-import React from 'react';
-
-
-export default function SpecialtyDisplay({ specialty }) {
-  if (!specialty) return null;
-
+export default function SpecialtyDisplay() {
   return (
-    <div className="specialty-box">
-      <div className="specialty-label">Signature Expertise</div>
-      <div className="specialty-text">{specialty}</div>
-    </div>
+    <section className="container page">
+      <h1>Specialty display</h1>
+      <p>TODO: build this component.</p>
+    </section>
   );
 }

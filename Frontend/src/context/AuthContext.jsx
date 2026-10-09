@@ -9,15 +9,11 @@ export function AuthProvider({ children }) {
 
   // restore the session when the page loads
   useEffect(() => {
-    // TEMPORARY BYPASS FOR UI TESTING
-    setAdmin({ name: 'Rashaan', email: 'admin@saffron.com' });
-    setLoading(false);
-    
-    /* --- COMMENTED OUT REAL AUTH ---
+    // DEV ONLY: set VITE_DEV_BYPASS_AUTH=true in .env to view the admin UI without a backend
+    if (import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') { setAdmin({ name: 'Amara Perera' }); return setLoading(false); }
     const token = localStorage.getItem('adminToken');
     if (!token) return setLoading(false);
     authApi.me().then(setAdmin).catch(() => localStorage.removeItem('adminToken')).finally(() => setLoading(false));
-    */
   }, []);
 
   const login = async (email, password) => {

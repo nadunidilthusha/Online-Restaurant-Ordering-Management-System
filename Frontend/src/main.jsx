@@ -6,6 +6,8 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import './assets/styles/variables.css';
 import './assets/styles/global.css';
+import './assets/styles/site.css';
+import './assets/styles/admin.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
