@@ -44,3 +44,4 @@ export default function FoodCard({ item }) {
     </div>
   );
 }
+
