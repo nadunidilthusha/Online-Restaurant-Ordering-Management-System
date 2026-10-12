@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
@@ -18,7 +18,9 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <Link to="/" className="logo">Saffron<span>&amp;</span>Fig</Link>
+            <Link to="/" className="logo">
+              Saffron<span>&amp;</span>Fig
+            </Link>
             <p>Seasonal food, cooked over open fire, since 2014.</p>
             <div className="socials">
               <a href="#" aria-label="Instagram">IG</a>
@@ -26,6 +28,7 @@ export default function Footer() {
               <a href="#" aria-label="X">X</a>
             </div>
           </div>
+
           <div>
             <h4>Explore</h4>
             <ul>
@@ -35,6 +38,7 @@ export default function Footer() {
               <li><Link to="/contact">Contact</Link></li>
             </ul>
           </div>
+
           <div>
             <h4>Visit us</h4>
             <ul>
@@ -44,16 +48,27 @@ export default function Footer() {
               <li><a href="mailto:hello@saffronfig.com">hello@saffronfig.com</a></li>
             </ul>
           </div>
+
           <div>
             <h4>Get weekly specials</h4>
             <p>One email a week. Unsubscribe anytime.</p>
             <form className="newsletter" onSubmit={subscribe}>
-              <input type="email" required placeholder="Your email" aria-label="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <button className="btn btn-primary" type="submit">Subscribe</button>
+              <input
+                type="email"
+                required
+                placeholder="Your email"
+                aria-label="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button className="btn btn-primary" type="submit">
+                Subscribe
+              </button>
             </form>
             {done && <p className="subscribed" role="status">Subscribed. Thank you!</p>}
           </div>
         </div>
+
         <div className="footer-bottom">
           <span>&copy; {new Date().getFullYear()} Saffron &amp; Fig. All rights reserved.</span>
           <span><a href="#">Privacy</a> &nbsp; <a href="#">Terms</a></span>

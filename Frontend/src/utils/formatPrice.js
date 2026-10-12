@@ -1,2 +1,1 @@
-export const formatPrice = (n) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+export const formatPrice = (n) => `RS ${Number(n || 0).toFixed(2)}`;
