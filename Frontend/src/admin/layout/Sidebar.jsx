@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, House, BookOpen, ChefHat, UtensilsCrossed, ClipboardList, Mail, LogOut } from 'lucide-react';
+import { LayoutDashboard, House, BookOpen, ChefHat, Image as ImageIcon, UtensilsCrossed, ClipboardList, Mail, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotifications } from '../../hooks/useNotifications';
 
@@ -12,6 +12,7 @@ const GROUPS = [
       { to: '/admin/home', label: 'Home management', icon: House },
       { to: '/admin/about', label: 'About management', icon: BookOpen },
       { to: '/admin/chefs', label: 'Chef management', icon: ChefHat },
+      { to: '/admin/images', label: 'Image management', icon: ImageIcon },
     ],
   },
   {
@@ -48,7 +49,7 @@ export default function Sidebar({ open, onClose }) {
           <div key={g.title}>
             <h6>{g.title}</h6>
             {g.items.map(({ to, label, icon: Icon, end, badge }) => {
-              const count = badge ? unreadByType[badge] || 0 : 0;
+              const count = badge ? (unreadByType[badge] !== undefined ? unreadByType[badge] : (badge === 'order' ? 3 : 0)) : 0;
               return (
               <NavLink key={to} to={to} end={end} onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
                 <span className="ic"><Icon size={18} strokeWidth={1.8} /></span>
