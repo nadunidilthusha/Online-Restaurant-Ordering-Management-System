@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ChefCard from './ChefCard';
 import "../../assets/styles/Chefs.css";
 
@@ -24,10 +25,24 @@ const chefsData = [
 export default function ChefListPage() {
   return (
     <div className="chefs-page">
-      <section className="chefs-hero animate-fade-up delay-1">
-        <div className="subtitle">Meet the masters</div>
-        <h1>Our Chefs</h1>
-        <p>The culinary minds behind Saffron & Fig. Dedicated to preserving heritage village recipes and mastering the art of wood-fired cooking.</p>
+      <section className="chefs-hero animate-fade-up delay-1" style={{ textAlign: 'center', padding: '100px 20px 80px', backgroundColor: '#1a050a' }}>
+        
+        {/* The Breadcrumb Navigation */}
+        <nav aria-label="breadcrumb" style={{ color: '#a3a3a3', fontSize: '0.95rem', marginBottom: '24px', letterSpacing: '0.5px' }}>
+          <Link to="/" style={{ color: '#a3a3a3', textDecoration: 'none' }}>Home</Link>
+          <span style={{ margin: '0 12px' }}>/</span>
+          <span style={{ color: '#e8c99b' }}>Chefs</span>
+        </nav>
+
+        {/* Styled Main Title matching "Our story" */}
+        <h1 style={{ fontFamily: 'var(--serif)', fontSize: '4rem', color: '#ffffff', margin: '0 0 24px 0', fontWeight: '400' }}>
+          Our <span style={{ color: '#e8c99b', fontStyle: 'italic' }}>Chefs</span>
+        </h1>
+        
+        {/* Styled Description Paragraph */}
+        <p style={{ color: '#d4d4d4', fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto', lineHeight: '1.8', letterSpacing: '0.5px' }}>
+          The culinary minds behind Saffron & Fig. Dedicated to preserving heritage village recipes and mastering the art of wood-fired cooking.
+        </p>
       </section>
 
       <section className="chefs-container">
