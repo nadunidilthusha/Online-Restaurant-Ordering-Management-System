@@ -19,17 +19,12 @@ export default function FoodCard({ item }) {
 
   return (
     <div className="food-card" style={{ 
-      backgroundColor: '#fff', 
-      borderRadius: '150px 150px 12px 12px', 
-      overflow: 'hidden', 
-      border: '1px solid #eaeaea', 
       display: 'flex', 
       flexDirection: 'column',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+      width: '100%'
     }}>
       
-      {/* Arched Image Section with Overlapping Tag */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '4/5' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '4/5', marginBottom: '24px' }}>
         <img 
           src={item.image} 
           alt={item.name} 
@@ -38,7 +33,7 @@ export default function FoodCard({ item }) {
         {item.tag && (
           <div style={{ position: 'absolute', bottom: '16px', width: '100%', display: 'flex', justifyContent: 'center' }}>
             <span style={{
-              backgroundColor: '#98373b', /* Deep red matching the screenshot */
+              backgroundColor: '#98373b', 
               color: '#fff',
               padding: '4px 16px',
               fontSize: '0.75rem',
@@ -54,36 +49,38 @@ export default function FoodCard({ item }) {
         )}
       </div>
       
-      {/* Text and Actions Section */}
-      <div style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', flexGrow: 1 }}>
-        <h3 style={{ color: '#1a050a', fontSize: '1.15rem', marginBottom: '12px', fontFamily: 'var(--serif)', textAlign: 'center', fontWeight: '400' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 8px' }}>
+        <h3 style={{ color: '#1a050a', fontSize: '1.25rem', marginBottom: '12px', fontFamily: 'var(--serif)', textAlign: 'center', fontWeight: '400' }}>
           {item.name}
         </h3>
-        <p style={{ color: '#a3a3a3', fontSize: '0.85rem', lineHeight: '1.6', marginBottom: '24px', textAlign: 'center', flexGrow: 1 }}>
+        
+        <p style={{ color: '#999999', fontSize: '0.85rem', lineHeight: '1.6', marginBottom: '24px', textAlign: 'center', flexGrow: 1 }}>
           {item.desc}
         </p>
         
-        {/* Price and Add Button Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0 8px' }}>
-          <span className="price" style={{ color: '#888888', fontWeight: '500', fontSize: '0.9rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', width: '100%' }}>
+          
+          {/* FIXED: Increased fontSize to 1.45rem to make the amount bigger */}
+          <span className="price" style={{ color: '#c98d49', fontFamily: 'var(--serif)', fontWeight: '400', fontSize: '1.45rem' }}>
             {formatPrice(item.price)}
           </span>
+          
           <button 
             onClick={handleAddToCart} 
             aria-label={`Add ${item.name} to cart`}
             style={{
-              backgroundColor: justAdded ? '#10b981' : '#1a050a', /* Dark circle matching the screenshot */
-              color: '#fff',
+              backgroundColor: justAdded ? '#10b981' : '#c98d49', 
+              color: '#1a050a', 
               border: 'none',
-              width: '32px',
-              height: '32px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '1.2rem',
+              fontWeight: '400',
+              fontSize: '1.5rem',
               lineHeight: '1',
               transition: 'background-color 0.2s, transform 0.2s'
             }}
