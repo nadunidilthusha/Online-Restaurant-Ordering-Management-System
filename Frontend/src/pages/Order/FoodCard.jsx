@@ -10,33 +10,21 @@ export default function FoodCard({ item }) {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.image,
-      desc: item.desc,
-      tag: item.tag,
-      tagType: item.tagType,
-      note: item.note,
+      image: item.image
     });
   };
 
   return (
     <div className="food-card">
-      <img
-        src={item.image}
-        alt={item.name}
-        className="food-image"
-        onError={(e) => {
-          e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80';
-        }}
-      />
+      <img src={item.image} alt={item.name} className="food-image" />
       <h3 className="food-name">{item.name}</h3>
       <p className="food-desc">{item.desc}</p>
       <div className="food-action-row">
         <span className="food-price">{formatPrice(item.price)}</span>
-        <button
-          className="add-btn"
+        <button 
+          className="add-btn" 
           onClick={handleAddToCart}
           aria-label={`Add ${item.name} to cart`}
-          title={`Add ${item.name} to cart`}
         >
           +
         </button>
@@ -44,4 +32,3 @@ export default function FoodCard({ item }) {
     </div>
   );
 }
-
