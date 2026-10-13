@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../../hooks/useCart';
 import { formatPrice } from '../../utils/formatPrice';
 
 export default function FoodCard({ item }) {
   const { addItem } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
 
   const handleAddToCart = () => {
     addItem({
@@ -12,22 +13,86 @@ export default function FoodCard({ item }) {
       price: item.price,
       image: item.image
     });
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1200);
   };
 
   return (
-    <div className="food-card">
-      <img src={item.image} alt={item.name} className="food-image" />
-      <h3 className="food-name">{item.name}</h3>
-      <p className="food-desc">{item.desc}</p>
-      <div className="food-action-row">
-        <span className="food-price">{formatPrice(item.price)}</span>
-        <button 
-          className="add-btn" 
-          onClick={handleAddToCart}
-          aria-label={`Add ${item.name} to cart`}
-        >
-          +
-        </button>
+    <div className="food-card" style={{ 
+      backgroundColor: '#fff', 
+      borderRadius: '150px 150px 12px 12px', 
+      overflow: 'hidden', 
+      border: '1px solid #eaeaea', 
+      display: 'flex', 
+      flexDirection: 'column',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+    }}>
+      
+      {/* Arched Image Section with Overlapping Tag */}
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '4/5' }}>
+        <img 
+          src={item.image} 
+          alt={item.name} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '150px 150px 0 0' }} 
+        />
+        {item.tag && (
+          <div style={{ position: 'absolute', bottom: '16px', width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <span style={{
+              backgroundColor: '#98373b', /* Deep red matching the screenshot */
+              color: '#fff',
+              padding: '4px 16px',
+              fontSize: '0.75rem',
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            }}>
+              {item.tag}
+            </span>
+          </div>
+        )}
+      </div>
+      
+      {/* Text and Actions Section */}
+      <div style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', flexGrow: 1 }}>
+        <h3 style={{ color: '#1a050a', fontSize: '1.15rem', marginBottom: '12px', fontFamily: 'var(--serif)', textAlign: 'center', fontWeight: '400' }}>
+          {item.name}
+        </h3>
+        <p style={{ color: '#a3a3a3', fontSize: '0.85rem', lineHeight: '1.6', marginBottom: '24px', textAlign: 'center', flexGrow: 1 }}>
+          {item.desc}
+        </p>
+        
+        {/* Price and Add Button Row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0 8px' }}>
+          <span className="price" style={{ color: '#888888', fontWeight: '500', fontSize: '0.9rem' }}>
+            {formatPrice(item.price)}
+          </span>
+          <button 
+            onClick={handleAddToCart} 
+            aria-label={`Add ${item.name} to cart`}
+            style={{
+              backgroundColor: justAdded ? '#10b981' : '#1a050a', /* Dark circle matching the screenshot */
+              color: '#fff',
+              border: 'none',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+              lineHeight: '1',
+              transition: 'background-color 0.2s, transform 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            {justAdded ? '✓' : '+'}
+          </button>
+        </div>
       </div>
     </div>
   );
