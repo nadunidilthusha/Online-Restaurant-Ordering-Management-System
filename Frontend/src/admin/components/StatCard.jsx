@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react';
+import { ShoppingBag, Wallet, UserPlus, Mail } from 'lucide-react';
+
+// icon for each summary card, picked by the card's id
+const ICONS = { orders: ShoppingBag, revenue: Wallet, customers: UserPlus, messages: Mail };
 
 // counts up to `value` once on mount
 function useCountUp(target, ms = 1400) {
@@ -17,11 +21,13 @@ function useCountUp(target, ms = 1400) {
   return n;
 }
 
-export default function StatCard({ label, value, prefix = '', icon, color }) {
+export default function StatCard({ id, label, value, prefix = '', icon, color }) {
   const n = useCountUp(value);
+  const Icon = ICONS[id];
+
   return (
     <div className="kpi" style={{ '--c': color }}>
-      <div className="kpi-ic">{icon}</div>
+      <div className="kpi-ic">{Icon ? <Icon size={22} strokeWidth={1.8} /> : icon}</div>
       <span className="kpi-label">{label}</span>
       <b>{prefix}{n.toLocaleString()}</b>
     </div>
