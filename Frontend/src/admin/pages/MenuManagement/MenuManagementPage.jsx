@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Edit, Trash2 } from 'lucide-react'; // Imported icons
 import Card from '../../../components/common/Card';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/common/Select';
@@ -13,16 +14,26 @@ export default function MenuManagementPage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const fileInputRef = useRef(null);
 
+  // Added dynamic state for the menu table
+  const [menuItems, setMenuItems] = useState([
+    { id: 1, name: 'Fire-roasted Sea Bass', category: 'Mains', price: 'Rs. 3,500.00', status: 'Active' }
+  ]);
+
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
     setHasChanges(true);
-    // Clear error when user starts typing
     if (errors[field]) setErrors({ ...errors, [field]: null });
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ ...errors, image: "Image size must be less than 5MB" });
+        e.target.value = null; 
+        return;
+      }
+
       setSelectedImage(file);
       setHasChanges(true);
       if (errors.image) setErrors({ ...errors, image: null });
@@ -41,10 +52,16 @@ export default function MenuManagementPage() {
       return;
     }
 
-    // Success - Ready to send to API
     alert("Dish validated and ready to save!");
     setErrors({});
     setHasChanges(false);
+  };
+
+  // Function to handle the remove action with a confirmation prompt
+  const handleDeleteMenu = (id, name) => {
+    if (window.confirm(`Are you sure you want to remove ${name} from the menu?`)) {
+      setMenuItems(menuItems.filter(item => item.id !== id));
+    }
   };
 
   return (
@@ -99,11 +116,36 @@ export default function MenuManagementPage() {
             <tr><th>Dish Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>Fire-roasted Sea Bass</strong></td><td>Mains</td><td>Rs. 3,500.00</td>
-              <td><span className="status-badge">Active</span></td>
-              <td><Link to="/admin/menu/1/edit" className="action-link">Edit</Link></td>
-            </tr>
+            {menuItems.length > 0 ? (
+              menuItems.map((item) => (
+                <tr key={item.id}>
+                  <td><strong>{item.name}</strong></td>
+                  <td>{item.category}</td>
+                  <td>{item.price}</td>
+                  <td><span className="status-badge">{item.status}</span></td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <Link to={`/admin/menu/${item.id}/edit`} title="Edit Dish" style={{ color: '#4b5563', display: 'flex', alignItems: 'center' }}>
+                        <Edit size={18} />
+                      </Link>
+                      <button 
+                        onClick={() => handleDeleteMenu(item.id, item.name)} 
+                        title="Remove Dish"
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                  No dishes currently listed.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </Card>
