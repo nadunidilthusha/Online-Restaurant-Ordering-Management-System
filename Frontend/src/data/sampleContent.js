@@ -89,12 +89,13 @@ export const SAMPLE_DASHBOARD = {
     { id: 'SF-1044', customer: 'Ravi Kumar', total: 61.2, status: 'completed' },
     { id: 'SF-1043', customer: 'Sara Jayawardena', total: 17, status: 'cancelled' },
   ],
-  recentMessages: [
-    { id: 1, name: 'Hana Wijesinghe', text: 'Do you take group bookings for 12 people on Friday?', time: '10m', unread: true },
-    { id: 2, name: 'Tom Mathews', text: 'Loved the sea bass, thank you so much!', time: '2h', unread: true },
-    { id: 3, name: 'Priya Nair', text: 'Is the tasting menu available for vegans?', time: '5h', unread: true },
-    { id: 4, name: 'Kasun Rajapaksa', text: 'Please confirm my catering quote.', time: '1d', unread: false },
+    recentMessages: [
+    { id: 1, name: 'Hana Wijesinghe', email: 'hana.w@example.com', text: 'Do you take group bookings for 12 people on Friday?', time: '10m', unread: true },
+    { id: 2, name: 'Tom Mathews', email: 'tom.m@example.com', text: 'Loved the sea bass, thank you so much!', time: '2h', unread: true },
+    { id: 3, name: 'Priya Nair', email: 'priya.n@example.com', text: 'Is the tasting menu available for vegans?', time: '5h', unread: true },
+    { id: 4, name: 'Kasun Rajapaksa', email: 'kasun.r@example.com', text: 'Please confirm my catering quote.', time: '1d', unread: false },
   ],
+  
   contentStatus: [
     { name: 'Home page', note: 'Updated today', state: 'live' }, { name: 'About page', note: 'Updated 3 days ago', state: 'live' },
     { name: 'Chefs', note: '2 profiles need photos', state: 'review' }, { name: 'Menu', note: '85 items, 4 hidden', state: 'live' },
@@ -115,3 +116,4 @@ export const SAMPLE_NOTIFICATIONS = [
   { id: 4, type: 'message', title: 'New message', text: 'Tom Mathews: Loved the sea bass, thank you so much!', createdAt: ago(120), read: true, link: '/admin/contact' },
   { id: 5, type: 'system', title: 'Gallery updated', text: '2 new photos were added to the About page', createdAt: ago(60 * 26), read: true, link: '/admin/about' },
 ];
+

@@ -388,3 +388,11 @@
   .grid-orders { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) { .admin-search { display: none; } }
+
+/* ---- dish cards: price row always on the same line ---- */
+.dish { display: flex; flex-direction: column; }
+.dish-body { flex: 1; }
+.dish-body p { flex: 1; }
+
+   /* ---- section subtitles: a little bigger (Offers & events + Featured dishes) ---- */
+   .promos .muted, .muted-dark { font-size: 1.2rem; margin-top: 1.1rem; }
