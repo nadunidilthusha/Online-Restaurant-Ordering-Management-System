@@ -1,4 +1,5 @@
 import { useContentEditor } from '../../../hooks/useContentEditor';
+import { isEmail } from '../../../utils/validators';
 import Loader from '../../../components/common/Loader';
 import Toast from '../../../components/common/Toast';
 import PageHeading from '../../components/PageHeading';
@@ -16,6 +17,18 @@ export default function AboutManagementPage() {
   const { draft, loading, usingSample, bind, update } = editor;
   if (loading || !draft) return <Loader />;
 
+  // block saving while the contact details are invalid
+  const email = draft.visit?.email || '';
+  const phoneDigits = (draft.visit?.phone || '').replace(/\D/g, '');
+  const invalid = (email && !isEmail(email)) || (phoneDigits && phoneDigits.length < 7);
+  const handleSave = () => {
+    if (invalid) {
+      window.alert('Please fix the email or phone number before saving.');
+      return;
+    }
+    editor.save();
+  };
+
   return (
     <>
       <PageHeading title="About management" text="Edit the restaurant history, mission and visit details." tabs={TABS} />
@@ -25,7 +38,7 @@ export default function AboutManagementPage() {
       <MissionEditor draft={draft} bind={bind} update={update} />
       <VisitEditor draft={draft} bind={bind} update={update} />
       <GalleryEditor draft={draft} update={update} />
-      <SaveBar dirty={editor.dirty} saving={editor.saving} onSave={editor.save} onDiscard={editor.discard} />
+      <SaveBar dirty={editor.dirty} saving={editor.saving} onSave={handleSave} onDiscard={editor.discard} />
       <Toast message={editor.message} />
     </>
   );
