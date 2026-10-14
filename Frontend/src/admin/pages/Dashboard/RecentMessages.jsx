@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { update } from '../../../api/contactApi';
-import Modal from '../../../components/common/Modal';
 import EmptyState from '../../../components/common/EmptyState';
 
 export default function RecentMessages({ messages }) {
   const [list, setList] = useState(messages); // local copy so the red dot can disappear
-  const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
 
   const openMessage = (m) => {
-    setSelected(m);
     if (m.unread) {
       setList((l) => l.map((x) => (x.id === m.id ? { ...x, unread: false } : x)));
       update(m.id, { read: true }).catch(() => {}); // saved on the server once the API exists
     }
+    // go straight to the Contact Management page with this message selected
+    navigate(`/admin/contact?id=${m.id}`);
   };
 
   return (
@@ -27,27 +27,6 @@ export default function RecentMessages({ messages }) {
           <time>{m.time}</time>
         </button>
       ))}
-
-      <Modal open={!!selected} onClose={() => setSelected(null)}>
-        {selected && (
-          <div className="msg-detail">
-            <div className="msg-detail-head">
-              <span className="mini big">{selected.name[0]}</span>
-              <div>
-                <h3>{selected.name}</h3>
-                <small>{selected.email || 'No email provided'} · {selected.time} ago</small>
-              </div>
-            </div>
-            <p className="msg-detail-body">{selected.text}</p>
-            <div className="msg-detail-actions">
-              {selected.email && (
-                <a className="btn btn-wine" href={`mailto:${selected.email}?subject=${encodeURIComponent('Re: your message to Saffron & Fig')}`}>Reply by email</a>
-              )}
-              <Link to="/admin/contact" className="btn btn-ghost-light" onClick={() => setSelected(null)}>Open inbox</Link>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }
