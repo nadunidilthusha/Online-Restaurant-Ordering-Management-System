@@ -14,7 +14,6 @@ import {
   Phone,
   Clock,
   Sparkles,
-  Paperclip,
   Send,
   FileDown,
   Edit3,
@@ -1030,15 +1029,6 @@ export default function ContactManagementPage() {
             <div className="reply-actions-row">
               <button
                 type="button"
-                className="btn-attachment"
-                onClick={() => showNotification('Attachment modal: File uploaded successfully.')}
-              >
-                <Paperclip size={14} />
-                Add Attachment
-              </button>
-
-              <button
-                type="button"
                 className="btn-send-reply"
                 onClick={handleSendReply}
               >
@@ -1096,16 +1086,6 @@ export default function ContactManagementPage() {
                   className="input"
                   value={publicDetails.address}
                   onChange={(e) => setPublicDetails({ ...publicDetails, address: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="lab">Operating Hours Display</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={publicDetails.hours}
-                  onChange={(e) => setPublicDetails({ ...publicDetails, hours: e.target.value })}
                 />
               </div>
 
