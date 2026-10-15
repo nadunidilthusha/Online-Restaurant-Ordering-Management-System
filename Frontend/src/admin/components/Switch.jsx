@@ -1,8 +1,14 @@
 export default function Switch({ checked, onChange, label }) {
   return (
-    <label className="toggle-row">
-      <span className="switch"><input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} /></span>
-      {label}
-    </label>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={!!checked}
+      className={`tgl ${checked ? 'on' : ''}`}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="tgl-track"><span className="tgl-knob" /></span>
+      {label && <span className="tgl-label">{label}</span>}
+    </button>
   );
 }

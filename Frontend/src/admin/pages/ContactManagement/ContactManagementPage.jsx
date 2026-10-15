@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import * as contactApi from '../../../api/contactApi';
 import SaveBar from '../../components/SaveBar';
 import {
@@ -303,8 +304,12 @@ const SEED_INQUIRIES = [
 ];
 
 export default function ContactManagementPage() {
+  // Message id passed from the dashboard (?id=...)
+  const [searchParams] = useSearchParams();
+  const linkedId = searchParams.get('id');
+
   const [inquiries, setInquiries] = useState(SEED_INQUIRIES);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(linkedId ? Number(linkedId) || linkedId : null);
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -314,8 +319,12 @@ export default function ContactManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showPublicModal, setShowPublicModal] = useState(false);
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
+  // Pagination State (opens on the page that contains the linked message)
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (!linkedId) return 1;
+    const idx = SEED_INQUIRIES.findIndex((i) => String(i.id) === String(linkedId));
+    return idx >= 0 ? Math.floor(idx / 5) + 1 : 1;
+  });
   const itemsPerPage = 5;
 
   // Draft reply per message
@@ -363,6 +372,12 @@ export default function ContactManagementPage() {
             status: item.status || 'Unread',
           }));
           setInquiries(mapped);
+
+          const target = linkedId && mapped.find((m) => String(m.id) === String(linkedId));
+          if (target) {
+            setSelectedId(target.id);
+            setCurrentPage(Math.floor(mapped.indexOf(target) / itemsPerPage) + 1);
+          }
         }
       })
       .catch(() => {
@@ -1040,7 +1055,7 @@ export default function ContactManagementPage() {
           Modal: Edit Public Storefront Details
           ------------------------------------------------------------- */}
       {showPublicModal && (
-        <div className="modal-backdrop" onClick={() => setShowPublicModal(false)}>
+        <div className="contact-modal-backdrop" onClick={() => setShowPublicModal(false)}>
           <div className="modal-content-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
               <h3>Edit Public Storefront Contacts</h3>

@@ -860,7 +860,7 @@
 /* -------------------------------------------------------------
    Modal: Edit Public Storefront Details
    ------------------------------------------------------------- */
-.modal-backdrop {
+.contact-modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(18, 5, 10, 0.65);
