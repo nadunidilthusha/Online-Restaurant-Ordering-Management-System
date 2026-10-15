@@ -1,14 +1,12 @@
 import NotificationBell from '../components/NotificationBell';
+import AdminSearch from '../components/AdminSearch';
 
 export default function Header({ onMenu }) {
   return (
     <header className="admin-header">
       <button className="burger" onClick={onMenu} aria-label="Open menu">☰</button>
 
-      <label className="admin-search">
-        <span aria-hidden="true">⌕</span>
-        <input type="search" placeholder="Search orders, dishes, messages…" aria-label="Search" />
-      </label>
+      <AdminSearch />
 
       <div className="admin-header-actions">
         <NotificationBell />

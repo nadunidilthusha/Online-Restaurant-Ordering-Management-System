@@ -304,7 +304,7 @@ const SEED_INQUIRIES = [
 ];
 
 export default function ContactManagementPage() {
-  // Message id passed from the dashboard (?id=...)
+  // Message id passed from the dashboard or the top search bar (?id=...)
   const [searchParams] = useSearchParams();
   const linkedId = searchParams.get('id');
 
@@ -386,6 +386,16 @@ export default function ContactManagementPage() {
         // Fallback to sample inquiries
       });
   }, []);
+
+  // When the URL ?id= changes (e.g. from the top search bar), jump to that message
+  useEffect(() => {
+    if (!linkedId) return;
+    const idx = inquiries.findIndex((i) => String(i.id) === String(linkedId));
+    if (idx >= 0) {
+      setSelectedId(inquiries[idx].id);
+      setCurrentPage(Math.floor(idx / itemsPerPage) + 1);
+    }
+  }, [linkedId]);
 
   const showNotification = (msg) => {
     setToast(msg);
