@@ -309,8 +309,8 @@ export default function ContactManagementPage() {
   const linkedId = searchParams.get('id');
 
   const [inquiries, setInquiries] = useState(SEED_INQUIRIES);
-  const [selectedId, setSelectedId] = useState(linkedId ? Number(linkedId) || linkedId : 1);
-  const [selectedRowIds, setSelectedRowIds] = useState([1]);
+  const [selectedId, setSelectedId] = useState(linkedId ? Number(linkedId) || linkedId : null);
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [toast, setToast] = useState('');
@@ -377,8 +377,6 @@ export default function ContactManagementPage() {
           if (target) {
             setSelectedId(target.id);
             setCurrentPage(Math.floor(mapped.indexOf(target) / itemsPerPage) + 1);
-          } else if (mapped[0]) {
-            setSelectedId(mapped[0].id);
           }
         }
       })
@@ -412,12 +410,10 @@ export default function ContactManagementPage() {
   const endIndex = Math.min(startIndex + itemsPerPage, filteredInquiries.length);
   const paginatedInquiries = filteredInquiries.slice(startIndex, endIndex);
 
-  // Selected Inquiry (fallback to first item on current page or first overall)
-  const selectedInquiry =
-    inquiries.find((i) => i.id === selectedId) ||
-    paginatedInquiries[0] ||
-    inquiries[0] ||
-    SEED_INQUIRIES[0];
+  // Selected Inquiry (only present when user explicitly clicked a row or inquiry)
+  const selectedInquiry = selectedId
+    ? inquiries.find((i) => i.id === selectedId) || null
+    : null;
 
   // Reset to page 1 when search or filter changes
   const handleSearchChange = (val) => {
@@ -433,11 +429,6 @@ export default function ContactManagementPage() {
   // Page Switch Handler
   const handlePageChange = (pageNum) => {
     setCurrentPage(pageNum);
-    // Auto-select the first item on that new page for a seamless experience
-    const firstOnPage = filteredInquiries[(pageNum - 1) * itemsPerPage];
-    if (firstOnPage) {
-      setSelectedId(firstOnPage.id);
-    }
   };
 
   // Counts for KPIs
@@ -473,6 +464,7 @@ export default function ContactManagementPage() {
 
   // Preset chip clicked
   const handleApplyPreset = (type) => {
+    if (!selectedInquiry) return;
     const name = selectedInquiry.name.split(' ')[0] || 'Patron';
     let text = '';
 
@@ -491,6 +483,7 @@ export default function ContactManagementPage() {
 
   // Smart assist
   const handleSmartAssist = () => {
+    if (!selectedInquiry) return;
     const name = selectedInquiry.name.split(' ')[0] || 'Patron';
     const smartDraft = `Dear ${name},\n\nThank you for contacting Saffron & Fig. Regarding your query regarding "${selectedInquiry.subject}":\n\nOur team is pleased to accommodate your requirements with bespoke dining arrangements. We ensure every detail is tailored to the highest culinary standards.\n\nShould you need immediate assistance, please call our concierge directly at +94 11 234 5678.\n\nWarmest regards,\nAmara Perera\nExecutive Chef & Concierge`;
     setDraftReplies((prev) => ({ ...prev, [selectedInquiry.id]: smartDraft }));
@@ -500,6 +493,7 @@ export default function ContactManagementPage() {
 
   // Send reply
   const handleSendReply = async () => {
+    if (!selectedInquiry) return;
     const replyText = draftReplies[selectedInquiry.id] || '';
     if (!replyText.trim()) {
       alert('Please compose a reply before sending.');
@@ -542,6 +536,9 @@ export default function ContactManagementPage() {
       }
       return nextList;
     });
+    if (selectedId === id) {
+      setSelectedId(null);
+    }
     contactApi.remove(id).catch(() => {});
     showNotification('Inquiry record deleted.');
   };
@@ -725,7 +722,7 @@ export default function ContactManagementPage() {
       {/* -------------------------------------------------------------
           Main Workspace Grid (Table on Left, Selected Query on Right)
           ------------------------------------------------------------- */}
-      <div className="contact-workspace-grid">
+      <div className={`contact-workspace-grid ${selectedInquiry ? 'has-detail' : ''}`}>
         {/* Left Column: Data Table */}
         <div className="contact-table-card">
           <div style={{ overflowX: 'auto' }}>
@@ -765,7 +762,7 @@ export default function ContactManagementPage() {
                       <tr
                         key={item.id}
                         className={isSelected ? 'is-active-row' : ''}
-                        onClick={() => setSelectedId(item.id)}
+                        onClick={() => setSelectedId((prev) => (prev === item.id ? null : item.id))}
                       >
                         <td className="col-check" onClick={(e) => e.stopPropagation()}>
                           <input
@@ -907,13 +904,25 @@ export default function ContactManagementPage() {
         </div>
 
         {/* Right Column: Selected Inbound Query Detail & Direct Reply */}
-        <div className="contact-detail-card">
-          <div className="detail-card-head">
-            <span className="detail-meta-label">SELECTED INBOUND QUERY</span>
-            <span className="detail-category-badge">{selectedInquiry.category}</span>
-          </div>
+        {selectedInquiry && (
+          <div className="contact-detail-card">
+            <div className="detail-card-head">
+              <span className="detail-meta-label">SELECTED INBOUND QUERY</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span className="detail-category-badge">{selectedInquiry.category}</span>
+                <button
+                  type="button"
+                  className="btn-close-detail"
+                  onClick={() => setSelectedId(null)}
+                  title="Close details"
+                  aria-label="Close details"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
 
-          <h2 className="detail-sender-name">{selectedInquiry.name}</h2>
+            <h2 className="detail-sender-name">{selectedInquiry.name}</h2>
 
           {/* Contact Strip */}
           <div className="detail-info-strip">
@@ -1039,7 +1048,8 @@ export default function ContactManagementPage() {
             </div>
           </div>
         </div>
-      </div>
+      )}
+    </div>
 
       {/* -------------------------------------------------------------
           Modal: Edit Public Storefront Details
