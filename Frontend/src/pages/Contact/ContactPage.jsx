@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ContactForm from './ContactForm';
 import ContactInfo from './ContactInfo';
 import MapEmbed from './MapEmbed';
@@ -10,6 +11,7 @@ export default function ContactPage() {
       <div className="contact-container">
         {/* Page Hero Header */}
         <header className="contact-header">
+          <p className="crumbs"><Link to="/">Home</Link> / Contact</p>
           <div className="contact-tag">
             <span className="contact-tag-dot"></span>
             CONCIERGE &amp; RESERVATIONS

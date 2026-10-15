@@ -270,9 +270,14 @@
    ------------------------------------------------------------- */
 .contact-workspace-grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.95fr;
+  grid-template-columns: 1fr;
   gap: 1.35rem;
   align-items: start;
+  transition: all 0.25s ease;
+}
+
+.contact-workspace-grid.has-detail {
+  grid-template-columns: 1.15fr 0.95fr;
 }
 
 /* -------------------------------------------------------------
@@ -548,7 +553,13 @@
 /* -------------------------------------------------------------
    Right Column: Selected Inbound Query & Quick Reply Panel
    ------------------------------------------------------------- */
+@keyframes detailSlideIn {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .contact-detail-card {
+  animation: detailSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   background: #fffdfa;
   border: 1px solid #e8decb;
   border-radius: 6px;
@@ -556,6 +567,26 @@
   box-shadow: 0 2px 10px rgba(42, 11, 19, 0.03);
   position: sticky;
   top: 90px;
+}
+
+.btn-close-detail {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid #dcd1be;
+  background: #ffffff;
+  color: #70625c;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-close-detail:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #f87171;
 }
 
 .detail-card-head {
