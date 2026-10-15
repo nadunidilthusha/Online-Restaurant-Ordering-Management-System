@@ -31,8 +31,16 @@ export default function EditChefPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // VALIDATION: Check if file size is strictly greater than 5MB (5 * 1024 * 1024 bytes)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ ...errors, image: "Image size must be less than 5MB" });
+        e.target.value = null; 
+        return;
+      }
+
       setPreviewUrl(URL.createObjectURL(file));
       setHasChanges(true);
+      if (errors.image) setErrors({ ...errors, image: null });
     }
   };
 
@@ -111,15 +119,20 @@ export default function EditChefPage() {
           <div className="field">
             <label>Profile Image</label>
             <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/png, image/jpeg" onChange={handleImageChange} />
-            <div className="image-upload-box" style={{ padding: '30px', minHeight: '180px' }} onClick={() => fileInputRef.current.click()}>
+            
+            {/* Added red border color logic if there is an error */}
+            <div className="image-upload-box" style={{ padding: '30px', minHeight: '180px', borderColor: errors.image ? '#ef4444' : '#e5e0d8', borderWidth: '2px', borderStyle: 'dashed', cursor: 'pointer', textAlign: 'center', borderRadius: '8px' }} onClick={() => fileInputRef.current.click()}>
               {previewUrl ? (
                 <img src={previewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%', marginBottom: '16px' }} />
               ) : (
-                <div style={{ width: '100px', height: '100px', backgroundColor: '#e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', marginBottom: '16px', color: '#888', fontSize: '0.8rem' }}>500 × 500</div>
+                <div style={{ width: '100px', height: '100px', backgroundColor: '#e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', margin: '0 auto 16px', color: '#888', fontSize: '0.8rem' }}>500 × 500</div>
               )}
-              <span style={{ fontWeight: '500', color: '#333', fontSize: '0.95rem' }}>+ Replace photo</span>
-              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888' }}>PNG, JPG up to 2MB</small>
+              <div style={{ fontWeight: '500', color: '#333', fontSize: '0.95rem' }}>+ Replace photo</div>
+              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888', display: 'block' }}>PNG, JPG up to 2MB</small>
             </div>
+            
+            {/* Added this line to actually display the red error message */}
+            {errors.image && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '8px', display: 'block' }}>{errors.image}</span>}
           </div>
         </div>
       </Card>

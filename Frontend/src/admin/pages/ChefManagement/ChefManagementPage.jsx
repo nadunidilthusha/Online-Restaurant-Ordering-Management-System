@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Edit, Trash2 } from 'lucide-react'; // Importing icons for actions
 import Card from '../../../components/common/Card';
 import Input from '../../../components/common/Input';
 import Textarea from '../../../components/common/Textarea';
 import Button from '../../../components/common/Button';
-// Reuse the perfected CSS from the Menu section!
 import '../MenuManagement/MenuAdmin.css'; 
 
 export default function ChefManagementPage() {
@@ -13,6 +13,11 @@ export default function ChefManagementPage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Added state to make the table dynamic and allow deletions
+  const [chefs, setChefs] = useState([
+    { id: 1, name: 'Kamal Perera', title: 'Executive Chef', specialty: 'Clay Pot Feasts' }
+  ]);
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -23,6 +28,13 @@ export default function ChefManagementPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // VALIDATION: Check if file size is strictly greater than 5MB (5 * 1024 * 1024 bytes)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ ...errors, image: "Image size must be less than 5MB" });
+        e.target.value = null; 
+        return;
+      }
+
       setPreviewUrl(URL.createObjectURL(file));
       setHasChanges(true);
       if (errors.image) setErrors({ ...errors, image: null });
@@ -45,6 +57,13 @@ export default function ChefManagementPage() {
     alert("Chef profile validated and ready to save!");
     setErrors({});
     setHasChanges(false);
+  };
+
+  // New function to handle the remove action with a confirmation prompt
+  const handleDeleteChef = (id, name) => {
+    if (window.confirm(`Are you sure you want to remove ${name} from the culinary team?`)) {
+      setChefs(chefs.filter(chef => chef.id !== id));
+    }
   };
 
   return (
@@ -103,18 +122,40 @@ export default function ChefManagementPage() {
             <tr><th>Chef Profile</th><th>Title</th><th>Specialty</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#e5e0d8' }}></div>
-                <strong>Kamal Perera</strong>
-              </td>
-              <td>Executive Chef</td>
-              <td>Clay Pot Feasts</td>
-              <td>
-                <Link to="/admin/chefs/1/edit" className="action-link" style={{ marginRight: '16px' }}>Edit</Link>
-                <span className="action-link" style={{ color: '#ef4444', cursor: 'pointer' }}>Remove</span>
-              </td>
-            </tr>
+            {chefs.length > 0 ? (
+              chefs.map((chef) => (
+                <tr key={chef.id}>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                      {chef.name.charAt(0)}
+                    </div>
+                    <strong>{chef.name}</strong>
+                  </td>
+                  <td>{chef.title}</td>
+                  <td>{chef.specialty}</td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <Link to={`/admin/chefs/${chef.id}/edit`} title="Edit Chef" style={{ color: '#4b5563', display: 'flex', alignItems: 'center' }}>
+                        <Edit size={18} />
+                      </Link>
+                      <button 
+                        onClick={() => handleDeleteChef(chef.id, chef.name)} 
+                        title="Remove Chef"
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '32px', color: '#888' }}>
+                  No chefs currently listed.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </Card>

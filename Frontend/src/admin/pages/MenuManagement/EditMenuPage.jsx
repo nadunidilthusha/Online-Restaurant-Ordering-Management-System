@@ -33,8 +33,16 @@ export default function EditMenuPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // VALIDATION: Check if file size is strictly greater than 5MB (5 * 1024 * 1024 bytes)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ ...errors, image: "Image size must be less than 5MB" });
+        e.target.value = null; 
+        return;
+      }
+
       setPreviewUrl(URL.createObjectURL(file));
       setHasChanges(true);
+      if (errors.image) setErrors({ ...errors, image: null });
     }
   };
 
@@ -109,15 +117,19 @@ export default function EditMenuPage() {
           <div className="field">
             <label>Dish Image</label>
             <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/png, image/jpeg" onChange={handleImageChange} />
-            <div className="image-upload-box" style={{ padding: '30px', minHeight: '180px' }} onClick={() => fileInputRef.current.click()}>
+            
+            <div className="image-upload-box" style={{ padding: '30px', minHeight: '180px', borderColor: errors.image ? '#ef4444' : '#e9ecef', borderWidth: '2px', borderStyle: 'dashed', cursor: 'pointer', textAlign: 'center', borderRadius: '4px' }} onClick={() => fileInputRef.current.click()}>
               {previewUrl ? (
                 <img src={previewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', marginBottom: '16px' }} />
               ) : (
-                <div style={{ width: '80px', height: '80px', backgroundColor: '#f1f3f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', marginBottom: '16px', color: '#adb5bd', fontSize: '0.8rem' }}>120 × 120</div>
+                <div style={{ width: '80px', height: '80px', backgroundColor: '#f1f3f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', margin: '0 auto 16px', color: '#adb5bd', fontSize: '0.8rem' }}>120 × 120</div>
               )}
-              <span style={{ fontWeight: '500', color: '#333', fontSize: '0.95rem' }}>+ Replace Image</span>
-              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888' }}>PNG, JPG up to 2MB</small>
+              <div style={{ fontWeight: '500', color: '#333', fontSize: '0.95rem' }}>+ Replace Image</div>
+              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888', display: 'block' }}>PNG, JPG up to 2MB</small>
             </div>
+            
+            {/* Display the red error message if the file is too large */}
+            {errors.image && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '8px', display: 'block' }}>{errors.image}</span>}
           </div>
         </div>
       </Card>

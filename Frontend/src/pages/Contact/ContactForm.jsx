@@ -9,8 +9,6 @@ export default function ContactForm() {
     inquiryType: 'General Inquiry',
     subject: '',
     message: '',
-    newsletter: false,
-    whatsappPreferred: true,
   });
 
   const [loading, setLoading] = useState(false);
@@ -44,7 +42,6 @@ export default function ContactForm() {
         inquiryType: formData.inquiryType,
         subject: formData.subject,
         message: formData.message,
-        whatsappPreferred: formData.whatsappPreferred,
       }).catch(() => {
         // Dev fallback
       });
@@ -57,8 +54,6 @@ export default function ContactForm() {
         inquiryType: 'General Inquiry',
         subject: '',
         message: '',
-        newsletter: false,
-        whatsappPreferred: true,
       });
     } catch {
       setError('An error occurred. Please try again.');
@@ -213,31 +208,6 @@ export default function ContactForm() {
               onChange={handleChange}
               required
             ></textarea>
-          </div>
-
-          <div className="cf-options-row">
-            <label className="cf-checkbox-label">
-              <input
-                type="checkbox"
-                name="newsletter"
-                checked={formData.newsletter}
-                onChange={handleChange}
-              />
-              <span>Send me weekly specials &amp; tasting notes</span>
-            </label>
-
-            <div className="whatsapp-toggle-wrap">
-              <span>WhatsApp preferred</span>
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  name="whatsappPreferred"
-                  checked={formData.whatsappPreferred}
-                  onChange={handleChange}
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
           </div>
 
           <button

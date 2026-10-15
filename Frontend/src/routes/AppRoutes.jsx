@@ -36,6 +36,7 @@ export default function AppRoutes() {
         <Route path="/chefs" element={<ChefListPage />} />
         <Route path="/chefs/:id" element={<ChefDetailsPage />} />
         <Route path="/order" element={<MenuPage />} />
+        <Route path="/cart" element={<CheckoutPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/confirmation/:orderId" element={<OrderConfirmationPage />} />
         <Route path="/contact" element={<ContactPage />} />
