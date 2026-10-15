@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import * as contactApi from '../../../api/contactApi';
 import SaveBar from '../../components/SaveBar';
@@ -14,7 +14,6 @@ import {
   Phone,
   Clock,
   Sparkles,
-  Paperclip,
   Send,
   FileDown,
   Edit3,
@@ -25,7 +24,31 @@ import {
 } from 'lucide-react';
 import '../../../assets/styles/AdminContact.css';
 
-const SEED_INQUIRIES = [
+const getRelativeDate = (daysAgo) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+};
+
+const SEED_DAYS_AGO = {
+  1: 0,
+  2: 0,
+  3: 0,
+  4: 1,
+  5: 2,
+  6: 3,
+  7: 4,
+  8: 5,
+  9: 5,
+  10: 6,
+  11: 7,
+  12: 7,
+  13: 8,
+  14: 9,
+  15: 14,
+};
+
+const RAW_SEED_INQUIRIES = [
   // --- PAGE 1 (1 to 5) ---
   {
     id: 1,
@@ -303,6 +326,11 @@ const SEED_INQUIRIES = [
   },
 ];
 
+const SEED_INQUIRIES = RAW_SEED_INQUIRIES.map((item) => ({
+  ...item,
+  date: getRelativeDate(SEED_DAYS_AGO[item.id] ?? 0),
+}));
+
 export default function ContactManagementPage() {
   // Message id passed from the dashboard (?id=...)
   const [searchParams] = useSearchParams();
@@ -313,6 +341,9 @@ export default function ContactManagementPage() {
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [dateFilter, setDateFilter] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = useRef(null);
   const [toast, setToast] = useState('');
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -369,6 +400,7 @@ export default function ContactManagementPage() {
             message: item.message || 'No message provided',
             received: 'Just now',
             receivedTimestamp: 'Recent via Storefront Form',
+            date: item.createdAt ? item.createdAt.slice(0, 10) : item.date || getRelativeDate(0),
             status: item.status || 'Unread',
           }));
           setInquiries(mapped);
@@ -384,6 +416,21 @@ export default function ContactManagementPage() {
         // Fallback to sample inquiries
       });
   }, []);
+
+  // Close date picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setShowDatePicker(false);
+      }
+    };
+    if (showDatePicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDatePicker]);
 
   const showNotification = (msg) => {
     setToast(msg);
@@ -401,7 +448,9 @@ export default function ContactManagementPage() {
     const matchesStatus =
       statusFilter === 'All' || item.status.toLowerCase() === statusFilter.toLowerCase();
 
-    return matchesSearch && matchesStatus;
+    const matchesDate = !dateFilter || item.date === dateFilter;
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   // Pagination Calculations
@@ -696,14 +745,115 @@ export default function ContactManagementPage() {
             <option value="Resolved">Status: Resolved</option>
           </select>
 
-          <button
-            type="button"
-            className="btn-icon-tool"
-            title="Filter by date range"
-            onClick={() => showNotification('Date filter calibrated to this month.')}
-          >
-            <Calendar size={16} />
-          </button>
+          {/* Calendar Date Picker Filter */}
+          <div className="date-filter-wrapper" ref={datePickerRef}>
+            {!dateFilter ? (
+              <button
+                type="button"
+                className={`btn-icon-tool ${showDatePicker ? 'active' : ''}`}
+                title="Filter inquiries by date"
+                aria-label="Filter inquiries by date"
+                onClick={() => setShowDatePicker((prev) => !prev)}
+              >
+                <Calendar size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-date-pill"
+                title="Click to modify date filter"
+                onClick={() => setShowDatePicker((prev) => !prev)}
+              >
+                <Calendar size={14} />
+                <span>{dateFilter}</span>
+                <span
+                  role="button"
+                  className="btn-clear-date-mini"
+                  title="Clear date filter"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDateFilter('');
+                    setCurrentPage(1);
+                    showNotification('Date filter cleared.');
+                  }}
+                >
+                  <X size={12} />
+                </span>
+              </button>
+            )}
+
+            {showDatePicker && (
+              <div className="date-picker-popover">
+                <div className="date-picker-popover-head">
+                  <span>Filter by Date</span>
+                  <button
+                    type="button"
+                    className="btn-popover-close"
+                    onClick={() => setShowDatePicker(false)}
+                    title="Close date picker"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="date-picker-popover-body">
+                  <input
+                    type="date"
+                    className="contact-date-input"
+                    value={dateFilter}
+                    onChange={(e) => {
+                      setDateFilter(e.target.value);
+                      setCurrentPage(1);
+                      if (e.target.value) {
+                        showNotification(`Filtered inquiries for ${e.target.value}`);
+                      }
+                    }}
+                  />
+                  <div className="date-picker-quick-actions">
+                    <button
+                      type="button"
+                      className="btn-quick-date"
+                      onClick={() => {
+                        const today = getRelativeDate(0);
+                        setDateFilter(today);
+                        setCurrentPage(1);
+                        setShowDatePicker(false);
+                        showNotification(`Showing inquiries for today (${today}).`);
+                      }}
+                    >
+                      Today
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-quick-date"
+                      onClick={() => {
+                        const yday = getRelativeDate(1);
+                        setDateFilter(yday);
+                        setCurrentPage(1);
+                        setShowDatePicker(false);
+                        showNotification(`Showing inquiries for yesterday (${yday}).`);
+                      }}
+                    >
+                      Yesterday
+                    </button>
+                    {dateFilter && (
+                      <button
+                        type="button"
+                        className="btn-clear-date"
+                        onClick={() => {
+                          setDateFilter('');
+                          setCurrentPage(1);
+                          setShowDatePicker(false);
+                          showNotification('Cleared date filter.');
+                        }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -750,7 +900,22 @@ export default function ContactManagementPage() {
                 {paginatedInquiries.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center', padding: '2.5rem', color: '#7a6e68' }}>
-                      No inquiries match the current search or status filter.
+                      No inquiries match the current search or status filter{dateFilter ? ` on date ${dateFilter}` : ''}.
+                      {dateFilter && (
+                        <div style={{ marginTop: '0.75rem' }}>
+                          <button
+                            type="button"
+                            className="btn-quick-date"
+                            style={{ display: 'inline-block', padding: '0.4rem 0.9rem' }}
+                            onClick={() => {
+                              setDateFilter('');
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Clear Date Filter
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ) : (
@@ -1030,15 +1195,6 @@ export default function ContactManagementPage() {
             <div className="reply-actions-row">
               <button
                 type="button"
-                className="btn-attachment"
-                onClick={() => showNotification('Attachment modal: File uploaded successfully.')}
-              >
-                <Paperclip size={14} />
-                Add Attachment
-              </button>
-
-              <button
-                type="button"
                 className="btn-send-reply"
                 onClick={handleSendReply}
               >
@@ -1096,16 +1252,6 @@ export default function ContactManagementPage() {
                   className="input"
                   value={publicDetails.address}
                   onChange={(e) => setPublicDetails({ ...publicDetails, address: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="lab">Operating Hours Display</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={publicDetails.hours}
-                  onChange={(e) => setPublicDetails({ ...publicDetails, hours: e.target.value })}
                 />
               </div>
 

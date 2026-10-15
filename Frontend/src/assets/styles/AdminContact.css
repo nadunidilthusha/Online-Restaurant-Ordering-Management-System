@@ -265,6 +265,160 @@
   background: #fdf9f2;
 }
 
+.btn-icon-tool.active {
+  border-color: #8c1d2f;
+  color: #8c1d2f;
+  background: #fbf2ec;
+}
+
+.date-filter-wrapper {
+  position: relative;
+}
+
+.btn-date-pill {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.75rem;
+  background: #fdf4f5;
+  border: 1px solid #8c1d2f;
+  border-radius: 4px;
+  color: #8c1d2f;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-date-pill:hover {
+  background: #fbe9ec;
+}
+
+.btn-clear-date-mini {
+  background: none;
+  border: none;
+  color: #8c1d2f;
+  cursor: pointer;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  margin-left: 2px;
+}
+
+.btn-clear-date-mini:hover {
+  background: rgba(140, 29, 47, 0.15);
+}
+
+.date-picker-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 100;
+  background: #fffdfa;
+  border: 1px solid #dcd1be;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(42, 11, 19, 0.12);
+  width: 250px;
+  padding: 0.85rem;
+  animation: popoverFadeIn 0.15s ease-out;
+}
+
+@keyframes popoverFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.date-picker-popover-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #240b13;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-popover-close {
+  background: none;
+  border: none;
+  color: #8a7c75;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.btn-popover-close:hover {
+  color: #8c1d2f;
+}
+
+.contact-date-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #dcd1be;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #240b13;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 0.65rem;
+}
+
+.contact-date-input:focus {
+  border-color: #8c1d2f;
+  box-shadow: 0 0 0 2px rgba(140, 29, 47, 0.08);
+}
+
+.date-picker-quick-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: space-between;
+}
+
+.btn-quick-date {
+  flex: 1;
+  padding: 0.35rem 0.4rem;
+  background: #faf6ee;
+  border: 1px solid #e0d4c1;
+  border-radius: 3px;
+  color: #240b13;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.btn-quick-date:hover {
+  background: #8c1d2f;
+  border-color: #8c1d2f;
+  color: #ffffff;
+}
+
+.btn-clear-date {
+  padding: 0.35rem 0.5rem;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 3px;
+  color: #b91c1c;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-clear-date:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
 /* -------------------------------------------------------------
    Main Grid Layout (Left: Table | Right: Selected Query Panel)
    ------------------------------------------------------------- */
@@ -805,7 +959,7 @@
 
 .reply-actions-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-top: 0.75rem;
 }

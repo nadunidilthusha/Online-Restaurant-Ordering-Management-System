@@ -62,36 +62,7 @@ export default function ContactInfo() {
         </div>
       </div>
 
-      {/* 4. Service Hours */}
-      <div className="info-card">
-        <div className="info-card-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-        </div>
-        <div className="info-card-content">
-          <div className="info-card-label">SERVICE HOURS</div>
-          <table className="hours-table">
-            <tbody>
-              <tr>
-                <td>Monday – Thursday</td>
-                <td>5:00 PM – 11:00 PM</td>
-              </tr>
-              <tr>
-                <td>Friday – Sunday</td>
-                <td>12:00 PM – Midnight</td>
-              </tr>
-              <tr>
-                <td>Weekend High Tea</td>
-                <td>3:30 PM – 5:30 PM</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 5. Kitchen Host Desk */}
+      {/* 4. Kitchen Host Desk */}
       <div className="info-card" style={{ borderLeft: '3px solid var(--wine)' }}>
         <div className="info-card-icon" style={{ background: '#240a12', color: '#ecd5a1' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
