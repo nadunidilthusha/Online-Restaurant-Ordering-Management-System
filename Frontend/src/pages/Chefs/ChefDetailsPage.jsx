@@ -7,7 +7,7 @@ export default function ChefDetailsPage() {
 
   return (
     <article className="page">
-      {/* Dark Page Header (Matches the 'Our story' About page style) */}
+      {/* Dark Page Header */}
       <header style={{ backgroundColor: '#1a050a', color: '#fff', padding: '100px 20px 80px', textAlign: 'center' }}>
         <div className="container">
           {/* Breadcrumb Navigation */}
@@ -28,20 +28,20 @@ export default function ChefDetailsPage() {
         </div>
       </header>
 
-      {/* Bio Section with readable dark text on white background */}
+      {/* Bio Section */}
       <section className="section light" style={{ backgroundColor: '#ffffff', padding: '80px 20px' }}>
         <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '64px', alignItems: 'start' }}>
           
-          {/* Chef Image with the rounded arch top */}
+          {/* Chef Image - Updated to real high-quality portrait matching the list page */}
           <div className="chef-portrait" style={{ borderRadius: '200px 200px 0 0', overflow: 'hidden', backgroundColor: '#f1f3f5', border: '1px solid #eaeaea' }}>
             <SafeImage 
-              src="https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=800&q=80" 
+              src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=800&q=80" 
               alt="Chef Kamal" 
               style={{ width: '100%', display: 'block', objectFit: 'cover', aspectRatio: '3/4' }} 
             />
           </div>
 
-          {/* Biography Text - Explicitly colored dark for visibility */}
+          {/* Biography Text */}
           <div className="chef-bio" style={{ color: '#333333' }}>
             <h2 style={{ fontFamily: 'var(--serif)', color: '#1a050a', fontSize: '2.5rem', marginBottom: '32px', fontWeight: '400' }}>
               The Journey

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import SpecialtyDisplay from './SpecialtyDisplay';
 import "../../assets/styles/Chefs.css";
 
@@ -30,12 +29,6 @@ export default function ChefCard({ chef, index }) {
         </p>
         
         <SpecialtyDisplay specialty={chef.specialty} />
-
-        <div style={{ marginTop: '24px' }}>
-          <Link to={`/chefs/${chef.id}`} className="btn btn-outline" style={{ display: 'inline-block', textDecoration: 'none', border: '1px solid #1a050a', color: '#1a050a', padding: '10px 24px' }}>
-            View Full Profile
-          </Link>
-        </div>
       </div>
     </div>
   );
