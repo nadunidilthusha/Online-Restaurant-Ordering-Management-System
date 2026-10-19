@@ -1,10 +1,11 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
+import path from 'path';
+
 const prisma = new PrismaClient();
-const fs = require('fs');
-const path = require('path');
 
 // Upload image
-exports.uploadImage = async (req, res) => {
+export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
@@ -33,7 +34,7 @@ exports.uploadImage = async (req, res) => {
 };
 
 // Replace image
-exports.replaceImage = async (req, res) => {
+export const replaceImage = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -49,9 +50,9 @@ exports.replaceImage = async (req, res) => {
       return res.status(404).json({ error: 'Image record not found' });
     }
 
-    // Optionally delete the old file from the server disk here using fs.unlinkSync
+    // Delete the old file from the server disk here using fs.unlinkSync
     try {
-      const oldFilePath = path.join(__dirname, '../../uploads', existingImage.filename);
+      const oldFilePath = path.join(import.meta.dirname, '../../uploads', existingImage.filename);
       if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
     } catch (err) {
       console.warn('Could not delete old image file from disk:', err);
@@ -78,7 +79,7 @@ exports.replaceImage = async (req, res) => {
 };
 
 // Delete image
-exports.deleteImage = async (req, res) => {
+export const deleteImage = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -92,7 +93,7 @@ exports.deleteImage = async (req, res) => {
 
     // Delete the file from the server disk
     try {
-      const filePath = path.join(__dirname, '../../uploads', existingImage.filename);
+      const filePath = path.join(import.meta.dirname, '../../uploads', existingImage.filename);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     } catch (err) {
       console.warn('Could not delete image file from disk:', err);

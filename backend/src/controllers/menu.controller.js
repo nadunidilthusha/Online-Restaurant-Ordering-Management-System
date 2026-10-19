@@ -1,8 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 // Create menu
-exports.createMenuItem = async (req, res) => {
+export const createMenuItem = async (req, res) => {
   try {
     const { name, description, price, category, tag, tagType, note, image, available } = req.body;
     const newItem = await prisma.menuItem.create({
@@ -26,7 +27,7 @@ exports.createMenuItem = async (req, res) => {
 };
 
 // Get menu
-exports.getAllMenuItems = async (req, res) => {
+export const getAllMenuItems = async (req, res) => {
   try {
     const items = await prisma.menuItem.findMany({
       orderBy: { createdAt: 'desc' }
@@ -39,7 +40,7 @@ exports.getAllMenuItems = async (req, res) => {
 };
 
 // Get menu by ID
-exports.getMenuItemById = async (req, res) => {
+export const getMenuItemById = async (req, res) => {
   try {
     const { id } = req.params;
     const item = await prisma.menuItem.findUnique({
@@ -57,7 +58,7 @@ exports.getMenuItemById = async (req, res) => {
 };
 
 // Update menu
-exports.updateMenuItem = async (req, res) => {
+export const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, price, category, tag, tagType, note, image, available } = req.body;
@@ -87,7 +88,7 @@ exports.updateMenuItem = async (req, res) => {
 };
 
 // Delete menu
-exports.deleteMenuItem = async (req, res) => {
+export const deleteMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.menuItem.delete({
@@ -100,5 +101,20 @@ exports.deleteMenuItem = async (req, res) => {
       return res.status(404).json({ error: 'Menu item not found' });
     }
     res.status(500).json({ error: 'Failed to delete menu item' });
+  }
+};
+
+// Get categories
+export const getCategories = async (req, res) => {
+  try {
+    const items = await prisma.menuItem.findMany({
+      select: { category: true },
+      distinct: ['category'],
+    });
+    const categories = items.map(item => item.category).filter(Boolean);
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
   }
 };

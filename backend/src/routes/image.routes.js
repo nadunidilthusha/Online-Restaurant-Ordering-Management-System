@@ -1,12 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const imageController = require('../controllers/image.controller');
-const upload = require('../middleware/upload');
+import express from 'express';
+import * as imageController from '../controllers/image.controller.js';
+import upload from '../middleware/upload.js';
 
-// Use the upload middleware specifically for routes that receive files
-// 'image' is the field name the frontend must use in the FormData
+const router = express.Router();
+
 router.post('/upload', upload.single('image'), imageController.uploadImage);
 router.put('/:id', upload.single('image'), imageController.replaceImage);
 router.delete('/:id', imageController.deleteImage);
 
-module.exports = router;
+export default router;

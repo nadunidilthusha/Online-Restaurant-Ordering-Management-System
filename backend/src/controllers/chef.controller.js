@@ -1,8 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 // Create chef
-exports.createChef = async (req, res) => {
+export const createChef = async (req, res) => {
   try {
     const { name, title, bio, specialty, image, active } = req.body;
     const newChef = await prisma.chef.create({
@@ -23,7 +24,7 @@ exports.createChef = async (req, res) => {
 };
 
 // Get chefs
-exports.getAllChefs = async (req, res) => {
+export const getAllChefs = async (req, res) => {
   try {
     const chefs = await prisma.chef.findMany({
       orderBy: { createdAt: 'desc' }
@@ -36,7 +37,7 @@ exports.getAllChefs = async (req, res) => {
 };
 
 // Get chef by ID
-exports.getChefById = async (req, res) => {
+export const getChefById = async (req, res) => {
   try {
     const { id } = req.params;
     const chef = await prisma.chef.findUnique({
@@ -54,7 +55,7 @@ exports.getChefById = async (req, res) => {
 };
 
 // Update chef
-exports.updateChef = async (req, res) => {
+export const updateChef = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, title, bio, specialty, image, active } = req.body;
@@ -81,7 +82,7 @@ exports.updateChef = async (req, res) => {
 };
 
 // Delete chef
-exports.deleteChef = async (req, res) => {
+export const deleteChef = async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.chef.delete({
