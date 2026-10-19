@@ -1,12 +1,14 @@
-import { Router } from 'express';
-// import * as controller from '../controllers/menu.controller.js';
+const express = require('express');
+const router = express.Router();
+const menuController = require('../controllers/menu.controller');
 
-const router = Router();
+// Categories route must come before /:id so 'categories' isn't treated as an ID
+router.get('/categories', menuController.getCategories);
 
-// TODO: GET / (public: only available items; admin: all)
-// TODO: GET /:id
-// TODO: POST / (admin)
-// TODO: PUT /:id (admin)
-// TODO: DELETE /:id (admin)
+router.post('/', menuController.createMenuItem);
+router.get('/', menuController.getAllMenuItems);
+router.get('/:id', menuController.getMenuItemById);
+router.put('/:id', menuController.updateMenuItem);
+router.delete('/:id', menuController.deleteMenuItem);
 
-export default router;
+module.exports = router;
