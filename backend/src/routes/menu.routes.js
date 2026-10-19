@@ -1,12 +1,13 @@
-import { Router } from 'express';
-// import * as controller from '../controllers/menu.controller.js';
+import express from 'express';
+import * as menuController from '../controllers/menu.controller.js';
 
-const router = Router();
+const router = express.Router();
 
-// TODO: GET / (public: only available items; admin: all)
-// TODO: GET /:id
-// TODO: POST / (admin)
-// TODO: PUT /:id (admin)
-// TODO: DELETE /:id (admin)
+router.get('/categories', menuController.getCategories);
+router.post('/', menuController.createMenuItem);
+router.get('/', menuController.getAllMenuItems);
+router.get('/:id', menuController.getMenuItemById);
+router.put('/:id', menuController.updateMenuItem);
+router.delete('/:id', menuController.deleteMenuItem);
 
 export default router;

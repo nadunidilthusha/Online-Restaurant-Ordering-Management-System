@@ -1,10 +1,11 @@
-import { Router } from 'express';
-// import * as controller from '../controllers/image.controller.js';
+import express from 'express';
+import * as imageController from '../controllers/image.controller.js';
+import upload from '../middleware/upload.js';
 
-const router = Router();
+const router = express.Router();
 
-// TODO: GET / (admin)
-// TODO: POST / (admin) multipart field 'image' -> { id, url }
-// TODO: DELETE /:id (admin)
+router.post('/upload', upload.single('image'), imageController.uploadImage);
+router.put('/:id', upload.single('image'), imageController.replaceImage);
+router.delete('/:id', imageController.deleteImage);
 
 export default router;

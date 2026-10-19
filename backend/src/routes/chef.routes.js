@@ -1,12 +1,12 @@
-import { Router } from 'express';
-// import * as controller from '../controllers/chef.controller.js';
+import express from 'express';
+import * as chefController from '../controllers/chef.controller.js';
 
-const router = Router();
+const router = express.Router();
 
-// TODO: GET / (public)
-// TODO: GET /:id (public)
-// TODO: POST / (admin)
-// TODO: PUT /:id (admin)
-// TODO: DELETE /:id (admin)
+router.post('/', chefController.createChef);
+router.get('/', chefController.getAllChefs);
+router.get('/:id', chefController.getChefById);
+router.put('/:id', chefController.updateChef);
+router.delete('/:id', chefController.deleteChef);
 
 export default router;
