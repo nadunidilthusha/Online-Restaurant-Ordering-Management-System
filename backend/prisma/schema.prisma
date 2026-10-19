@@ -21,7 +21,7 @@ model Admin {
 model MenuItem {
   id          Int         @id @default(autoincrement())
   name        String
-  description String      @default("") @db.Text
+  description String      @db.Text  // Removed @default("")
   price       Float
   category    String      @default("Mains")
   tag         String      @default("")
@@ -38,7 +38,7 @@ model Chef {
   id        Int      @id @default(autoincrement())
   name      String
   title     String   @default("")
-  bio       String   @default("") @db.Text
+  bio       String   @db.Text  // Removed @default("")
   specialty String   @default("")
   image     String   @default("")
   active    Boolean  @default(true)
@@ -55,7 +55,7 @@ model Order {
   orderType      String      @default("delivery")
   address        String      @default("")
   deliveryWindow String      @default("")
-  notes          String      @default("") @db.Text
+  notes          String      @db.Text  // Removed @default("")
   subtotal       Float       @default(0)
   deliveryFee    Float       @default(0)
   gst            Float       @default(0)
