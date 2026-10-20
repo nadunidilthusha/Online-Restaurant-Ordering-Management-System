@@ -1,11 +1,15 @@
 import { Router } from 'express';
-// import * as controller from '../controllers/admin.controller.js';
+import * as controller from '../controllers/admin.controller.js';
+import { adminOnly } from '../utils/adminGuard.js';
 
 const router = Router();
 
-// TODO: GET /dashboard (admin) -> { kpis, revenue, statuses, recentOrders, recentMessages, topDishes, contentStatus }
-// TODO: GET /notifications (admin) -> [{ id, type, title, text, createdAt, read, link }]
-// TODO: PATCH /notifications/:id/read (admin)
-// TODO: PATCH /notifications/read-all (admin)
+router.use(adminOnly); // everything under /api/admin is admin only
+
+router.get('/dashboard', controller.getDashboard);
+
+router.get('/notifications', controller.listNotifications);
+router.patch('/notifications/read-all', controller.markAllNotificationsRead);
+router.patch('/notifications/:id/read', controller.markNotificationRead);
 
 export default router;
