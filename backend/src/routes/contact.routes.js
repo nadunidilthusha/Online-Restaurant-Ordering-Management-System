@@ -1,12 +1,16 @@
 import { Router } from 'express';
-// import * as controller from '../controllers/contact.controller.js';
+import * as controller from '../controllers/contact.controller.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
-// TODO: POST / (public, contact form) body: name, email, phone, inquiryType, subject, message
-// TODO: GET / (admin)
-// TODO: GET /:id (admin)
-// TODO: PUT /:id (admin) body: { status } or { read: true }
-// TODO: DELETE /:id (admin)
+// Public route: submit contact / inquiry message
+router.post('/', controller.createMessage);
+
+// Admin routes: retrieve and manage contact inquiries
+router.get('/', requireAdmin, controller.getAllMessages);
+router.get('/:id', requireAdmin, controller.getMessageById);
+router.put('/:id', requireAdmin, controller.updateMessage);
+router.delete('/:id', requireAdmin, controller.deleteMessage);
 
 export default router;
