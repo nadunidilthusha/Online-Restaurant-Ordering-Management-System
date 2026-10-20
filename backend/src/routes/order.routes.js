@@ -1,13 +1,17 @@
 import { Router } from 'express';
-// import * as controller from '../controllers/order.controller.js';
+import * as controller from '../controllers/order.controller.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
-// TODO: POST / (public, checkout) body: customerName, email, phone, orderType, address, items[], subtotal, deliveryFee, gst, total
-// TODO: GET / (admin)
-// TODO: GET /:id (admin)
-// TODO: PUT /:id (admin)
-// TODO: PATCH /:id/status (admin) body: { status }
-// TODO: DELETE /:id (admin)
+// Public checkout route: create new order
+router.post('/', controller.createOrder);
+
+// Admin routes: order retrieval and lifecycle management
+router.get('/', requireAdmin, controller.getAllOrders);
+router.get('/:id', requireAdmin, controller.getOrderById);
+router.put('/:id', requireAdmin, controller.updateOrder);
+router.patch('/:id/status', requireAdmin, controller.updateOrderStatus);
+router.delete('/:id', requireAdmin, controller.deleteOrder);
 
 export default router;

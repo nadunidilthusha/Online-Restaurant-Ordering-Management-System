@@ -1,12 +1,17 @@
 import { Router } from 'express';
 import * as controller from '../controllers/content.controller.js';
-import { adminOnly } from '../utils/adminGuard.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/content/:page', controller.getContent);                // public: customer Home and About pages
-router.put('/content/:page', adminOnly, controller.saveContent);    // admin: Home management and About management
-router.get('/banners', controller.getBanners);                      // public
-router.get('/gallery', controller.getGallery);                      // public
+// Public: get page content JSON ('home' | 'about')
+router.get('/content/:page', controller.getContent);
+
+// Admin: save page content JSON document
+router.put('/content/:page', requireAdmin, controller.updateContent);
+
+// Public: get banners and gallery
+router.get('/banners', controller.getBanners);
+router.get('/gallery', controller.getGallery);
 
 export default router;
