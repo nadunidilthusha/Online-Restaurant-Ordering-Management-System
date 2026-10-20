@@ -1,169 +1,174 @@
 import prisma from '../lib/prisma.js';
+import { HttpError } from '../lib/httpError.js';
+import { dayKey, lastDays, lastMonths, round2, shortAgo, updatedAgo } from '../utils/time.js';
 
-/**
- * GET /api/admin/dashboard
- * Aggregates KPIs, status distribution, recent orders, recent messages, and revenue data.
- */
-export const getDashboardData = async (req, res) => {
-  try {
-    const [
-      totalOrdersCount,
-      totalInquiriesCount,
-      unreadInquiriesCount,
-      recentOrders,
-      recentInquiries,
-      allOrders,
-      menuItemCount,
-    ] = await Promise.all([
-      prisma.order.count(),
-      prisma.inquiry.count(),
-      prisma.inquiry.count({ where: { read: false } }),
-      prisma.order.findMany({
-        take: 6,
-        orderBy: { createdAt: 'desc' },
-        include: { items: true },
-      }),
-      prisma.inquiry.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.order.findMany({
-        select: { total: true, status: true, createdAt: true },
-      }),
-      prisma.menuItem.count(),
-    ]);
+const DAY_MS = 86400000;
 
-    // Calculate total revenue from all orders
-    const totalRevenue = allOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+const STATUS_META = [
+  { status: 'completed', label: 'Completed', color: '#3f7f6b' },
+  { status: 'preparing', label: 'Preparing', color: '#d98a3d' },
+  { status: 'on_the_way', label: 'On the way', color: '#3b6ea5' },
+  { status: 'new', label: 'New', color: '#8c1d2f' },
+  { status: 'cancelled', label: 'Cancelled', color: '#c2410c' },
+];
 
-    // Group order counts by status
-    const statusCounts = {
-      new: 0,
-      preparing: 0,
-      on_the_way: 0,
-      completed: 0,
-      cancelled: 0,
-    };
-    for (const ord of allOrders) {
-      const s = ord.status?.toLowerCase();
-      if (statusCounts[s] !== undefined) {
-        statusCounts[s]++;
-      }
-    }
-
-    const statuses = [
-      { label: 'Completed', count: statusCounts.completed, color: '#3f7f6b' },
-      { label: 'Preparing', count: statusCounts.preparing, color: '#d98a3d' },
-      { label: 'On the way', count: statusCounts.on_the_way, color: '#3b6ea5' },
-      { label: 'Cancelled', count: statusCounts.cancelled, color: '#c2410c' },
-    ];
-
-    const kpis = [
-      { id: 'orders', label: 'Total orders', value: totalOrdersCount, icon: '◈', color: '#8c1d2f' },
-      { id: 'revenue', label: 'Revenue', value: Math.round(totalRevenue), prefix: '$', icon: '💰', color: '#d98a3d' },
-      { id: 'dishes', label: 'Active dishes', value: menuItemCount, icon: '🍽️', color: '#3f7f6b' },
-      { id: 'messages', label: 'Unread messages', value: unreadInquiriesCount, icon: '✉', color: '#3b6ea5' },
-    ];
-
-    const days7 = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const revenue = {
-      weekly: { labels: days7, values: [3200, 2800, 3600, 3100, 4900, 6200, 5400] },
-      monthly: { labels: Array.from({ length: 30 }, (_, i) => String(i + 1)), values: [2900, 3100, 2700, 3300, 3000, 4400, 5200, 3100, 2800, 3500, 3200, 3400, 4700, 5600, 3300, 3000, 3600, 3400, 3700, 5100, 6000, 3500, 3300, 3800, 3600, 3900, 5300, 6500, 5900, 5600] },
-      annually: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], values: [38400, 41200, 45800, 50100, 47600, 55900, 61300, 58200, 63500, 67800, 72400, 81000] },
-    };
-
-    const topDishes = [
-      { name: 'Fire-roasted Sea Bass', sold: 212 },
-      { name: 'Wood-fired Margherita', sold: 184 },
-      { name: 'Smoked Lamb Rack', sold: 143 },
-      { name: 'Burrata & Fig Salad', sold: 121 },
-      { name: 'Salted Caramel Tart', sold: 96 },
-    ];
-
-    const contentStatus = [
-      { name: 'Home page', note: 'Live & synchronized', state: 'live' },
-      { name: 'About page', note: 'Live & synchronized', state: 'live' },
-      { name: 'Chefs', note: 'Active culinary directory', state: 'live' },
-      { name: 'Menu', note: `${menuItemCount} active items`, state: 'live' },
-      { name: 'Images', note: 'Media vault verified', state: 'live' },
-    ];
-
-    return res.status(200).json({
-      kpis,
-      revenue,
-      statuses,
-      recentOrders: recentOrders.map((o) => ({
-        id: o.id,
-        customer: o.customerName,
-        total: o.total,
-        status: o.status,
-        createdAt: o.createdAt,
-      })),
-      recentMessages: recentInquiries.map((m) => ({
-        id: m.id,
-        name: m.name,
-        email: m.email,
-        text: m.subject || m.message.slice(0, 50),
-        time: m.createdAt,
-        unread: !m.read,
-      })),
-      topDishes,
-      contentStatus,
-    });
-  } catch (error) {
-    console.error('Error loading dashboard overview:', error);
-    return res.status(500).json({ error: 'Failed to retrieve dashboard metrics.' });
+// adds up revenue per day / per month from a list of { createdAt, total }
+const sumBy = (orders, keyFn) => {
+  const map = new Map();
+  for (const o of orders) {
+    const k = keyFn(o.createdAt);
+    map.set(k, (map.get(k) || 0) + o.total);
   }
+  return map;
 };
 
-/**
- * GET /api/admin/notifications
- * Lists admin notifications.
- */
-export const getNotifications = async (req, res) => {
-  try {
-    const notifications = await prisma.notification.findMany({
+const revenueSeries = (orders) => {
+  const week = lastDays(7);
+  const month = lastDays(30);
+  const year = lastMonths(12);
+
+  const byDay = sumBy(orders, dayKey);
+  const byMonth = sumBy(orders, (d) => dayKey(d).slice(0, 7));
+
+  return {
+    weekly: { labels: week.map((d) => d.weekday), values: week.map((d) => round2(byDay.get(d.key) || 0)) },
+    monthly: { labels: month.map((d) => d.day), values: month.map((d) => round2(byDay.get(d.key) || 0)) },
+    annually: { labels: year.map((m) => m.label), values: year.map((m) => round2(byMonth.get(m.key) || 0)) },
+  };
+};
+
+// GET /api/admin/dashboard
+export const getDashboard = async (req, res) => {
+  const now = Date.now();
+  const since30 = new Date(now - 30 * DAY_MS);
+  const sinceChart = new Date(now - 400 * DAY_MS); // covers the 12 month chart
+
+  const [
+    orderCount,
+    revenueAgg,
+    customerFirstOrders,
+    unreadMessages,
+    statusGroups,
+    chartOrders,
+    recentOrders,
+    recentMessages,
+    topGroups,
+    homeRow,
+    aboutRow,
+    chefCount,
+    chefsWithoutPhoto,
+    menuCount,
+    menuHidden,
+    imageCount,
+  ] = await Promise.all([
+    prisma.order.count(),
+    prisma.order.aggregate({ where: { status: { not: 'cancelled' } }, _sum: { total: true } }),
+    // first order date for every customer; "new customer" = first order in the last 30 days
+    prisma.order.groupBy({ by: ['email', 'customerName'], _min: { createdAt: true } }),
+    prisma.inquiry.count({ where: { status: 'Unread', read: false } }),
+    prisma.order.groupBy({ by: ['status'], _count: { _all: true } }),
+    prisma.order.findMany({
+      where: { status: { not: 'cancelled' }, createdAt: { gte: sinceChart } },
+      select: { createdAt: true, total: true },
+    }),
+    prisma.order.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 20,
-    });
-    return res.status(200).json(notifications);
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-    return res.status(500).json({ error: 'Failed to retrieve notifications.' });
-  }
+      take: 6,
+      select: { id: true, customerName: true, total: true, status: true },
+    }),
+    prisma.inquiry.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+      select: { id: true, name: true, email: true, message: true, status: true, read: true, createdAt: true },
+    }),
+    prisma.orderItem.groupBy({
+      by: ['name'],
+      where: { order: { status: { not: 'cancelled' } } },
+      _sum: { qty: true },
+      orderBy: { _sum: { qty: 'desc' } },
+      take: 5,
+    }),
+    prisma.content.findUnique({ where: { page: 'home' }, select: { updatedAt: true } }),
+    prisma.content.findUnique({ where: { page: 'about' }, select: { updatedAt: true } }),
+    prisma.chef.count(),
+    prisma.chef.count({ where: { image: '' } }),
+    prisma.menuItem.count(),
+    prisma.menuItem.count({ where: { available: false } }),
+    prisma.image.count(),
+  ]);
+
+  const newCustomers = customerFirstOrders.filter((c) => c._min.createdAt >= since30).length;
+
+  const countsByStatus = Object.fromEntries(statusGroups.map((g) => [g.status, g._count._all]));
+
+  const pageStatus = (row, name) => ({
+    name,
+    note: row ? updatedAgo(row.updatedAt) : 'Showing default content',
+    state: 'live',
+  });
+
+  res.json({
+    kpis: [
+      { id: 'orders', label: 'Total orders', value: orderCount, icon: '◈', color: '#8c1d2f' },
+      { id: 'revenue', label: 'Revenue', value: Math.round(revenueAgg._sum.total || 0), prefix: 'Rs.', icon: '💰', color: '#d98a3d' },
+      { id: 'customers', label: 'New customers', value: newCustomers, icon: '☺', color: '#3f7f6b' },
+      { id: 'messages', label: 'Unread messages', value: unreadMessages, icon: '✉', color: '#3b6ea5' },
+    ],
+    revenue: revenueSeries(chartOrders),
+    statuses: STATUS_META.map((s) => ({ label: s.label, count: countsByStatus[s.status] || 0, color: s.color })),
+    recentOrders: recentOrders.map((o) => ({ id: o.id, customer: o.customerName, total: o.total, status: o.status })),
+    recentMessages: recentMessages.map((m) => ({
+      id: m.id,
+      name: m.name,
+      email: m.email,
+      text: m.message.length > 160 ? `${m.message.slice(0, 157)}...` : m.message,
+      time: shortAgo(m.createdAt),
+      unread: m.status === 'Unread' && !m.read,
+    })),
+    contentStatus: [
+      pageStatus(homeRow, 'Home page'),
+      pageStatus(aboutRow, 'About page'),
+      chefsWithoutPhoto > 0
+        ? { name: 'Chefs', note: `${chefsWithoutPhoto} ${chefsWithoutPhoto === 1 ? 'profile needs' : 'profiles need'} photos`, state: 'review' }
+        : { name: 'Chefs', note: `${chefCount} ${chefCount === 1 ? 'profile' : 'profiles'}`, state: 'live' },
+      { name: 'Menu', note: `${menuCount} items, ${menuHidden} hidden`, state: 'live' },
+      { name: 'Images', note: `${imageCount} ${imageCount === 1 ? 'file' : 'files'}`, state: 'live' },
+    ],
+    topDishes: topGroups.map((g) => ({ name: g.name, sold: g._sum.qty || 0 })),
+  });
 };
 
-/**
- * PATCH /api/admin/notifications/:id/read
- * Marks a single notification as read.
- */
+// ---------------------------------------------------------------
+// Notifications (the bell in the admin top bar)
+// ---------------------------------------------------------------
+
+const toClient = (n) => ({
+  id: n.id,
+  type: n.type,
+  title: n.title,
+  text: n.text,
+  createdAt: n.createdAt.toISOString(),
+  read: n.read,
+  link: n.link,
+});
+
+// GET /api/admin/notifications  ->  newest 30
+export const listNotifications = async (req, res) => {
+  const rows = await prisma.notification.findMany({ orderBy: { createdAt: 'desc' }, take: 30 });
+  res.json(rows.map(toClient));
+};
+
+// PATCH /api/admin/notifications/:id/read
 export const markNotificationRead = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updated = await prisma.notification.update({
-      where: { id: parseInt(id, 10) },
-      data: { read: true },
-    });
-    return res.status(200).json(updated);
-  } catch (error) {
-    console.error('Error updating notification:', error);
-    return res.status(500).json({ error: 'Failed to update notification.' });
-  }
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) throw new HttpError(400, 'Invalid notification id');
+  const result = await prisma.notification.updateMany({ where: { id }, data: { read: true } });
+  if (result.count === 0) throw new HttpError(404, 'Notification not found');
+  res.json({ ok: true });
 };
 
-/**
- * PATCH /api/admin/notifications/read-all
- * Marks all notifications as read.
- */
+// PATCH /api/admin/notifications/read-all
 export const markAllNotificationsRead = async (req, res) => {
-  try {
-    await prisma.notification.updateMany({
-      where: { read: false },
-      data: { read: true },
-    });
-    return res.status(200).json({ message: 'All notifications marked as read.' });
-  } catch (error) {
-    console.error('Error updating all notifications:', error);
-    return res.status(500).json({ error: 'Failed to update notifications.' });
-  }
+  const result = await prisma.notification.updateMany({ where: { read: false }, data: { read: true } });
+  res.json({ ok: true, updated: result.count });
 };
