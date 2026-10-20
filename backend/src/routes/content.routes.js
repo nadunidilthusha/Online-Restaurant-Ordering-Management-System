@@ -8,7 +8,7 @@ const router = Router();
 router.get('/content/:page', controller.getContent);
 
 // Admin: save page content JSON document
-router.put('/content/:page', requireAdmin, controller.updateContent);
+router.put('/content/:page', requireAdmin, controller.saveContent);
 
 // Public: get banners and gallery
 router.get('/banners', controller.getBanners);
