@@ -1,2 +1,9 @@
-// TODO: optional helper that validates req.body with a zod schema and responds 400 on errors.
-export {};
+export const validate = (schema) => (req, res, next) => {
+  try {
+    schema.parse(req.body);
+    next();
+  } catch (error) {
+    // Send back the first validation error message to the frontend
+    return res.status(400).json({ error: error.errors[0].message });
+  }
+};
