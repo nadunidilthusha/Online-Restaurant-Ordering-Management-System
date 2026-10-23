@@ -11,7 +11,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401 && window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
+    if (
+      err.response?.status === 401 &&
+      window.location.pathname.startsWith('/admin') &&
+      window.location.pathname !== '/admin/login' &&
+      import.meta.env.VITE_DEV_BYPASS_AUTH !== 'true'
+    ) {
       localStorage.removeItem('adminToken');
       window.location.href = '/admin/login';
     }

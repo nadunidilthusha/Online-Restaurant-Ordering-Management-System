@@ -20,6 +20,8 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use('/uploads', express.static(path.resolve('uploads')));
 
+app.get('/', (req, res) => res.json({ message: 'Saffron & Fig Backend API is running', frontendUrl: process.env.CLIENT_URL || 'http://localhost:5173' }));
+app.get('/api', (req, res) => res.json({ message: 'Saffron & Fig Backend API is running', health: '/api/health', frontendUrl: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
