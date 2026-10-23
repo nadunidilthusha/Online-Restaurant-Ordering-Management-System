@@ -11,6 +11,7 @@ router.post('/', controller.createMessage);
 router.get('/', requireAdmin, controller.getAllMessages);
 router.get('/:id', requireAdmin, controller.getMessageById);
 router.put('/:id', requireAdmin, controller.updateMessage);
+router.post('/:id/reply', requireAdmin, controller.sendReplyMessage);
 router.delete('/:id', requireAdmin, controller.deleteMessage);
 
 export default router;

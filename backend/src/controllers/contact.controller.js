@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { sendEmail } from '../lib/mailer.js';
 
 /**
  * POST /api/contact
@@ -188,3 +189,61 @@ export const deleteMessage = async (req, res) => {
     return res.status(500).json({ error: 'Failed to delete inquiry.' });
   }
 };
+
+/**
+ * POST /api/contact/:id/reply
+ * Dispatches an email reply to the customer and marks the inquiry as Replied.
+ */
+export const sendReplyMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message, subject, to } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Reply message text is required.' });
+    }
+
+    let inquiry = null;
+    try {
+      inquiry = await prisma.inquiry.findUnique({
+        where: { id: parseInt(id, 10) },
+      });
+    } catch {
+      // Proceed if DB is offline
+    }
+
+    const recipientEmail = to || inquiry?.email;
+    if (!recipientEmail) {
+      return res.status(400).json({ error: 'Recipient email address not found.' });
+    }
+
+    const emailSubject = subject || (inquiry?.subject ? `Re: ${inquiry.subject}` : 'Re: Saffron & Fig Dining Inquiry');
+
+    // Dispatch email via Nodemailer
+    const mailResult = await sendEmail({
+      to: recipientEmail,
+      subject: emailSubject,
+      text: message,
+    });
+
+    // Update status in database if available
+    try {
+      await prisma.inquiry.update({
+        where: { id: parseInt(id, 10) },
+        data: { status: 'Replied', read: true },
+      });
+    } catch {
+      // Proceed if DB is offline
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Email reply successfully dispatched to ${recipientEmail}`,
+      mailResult,
+    });
+  } catch (error) {
+    console.error('Error sending reply email:', error);
+    return res.status(500).json({ error: error.message || 'Failed to dispatch email reply.' });
+  }
+};
+

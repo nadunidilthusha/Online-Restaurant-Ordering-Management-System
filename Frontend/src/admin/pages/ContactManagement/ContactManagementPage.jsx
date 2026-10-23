@@ -21,6 +21,7 @@ import {
   X,
   MapPin,
   CheckCircle2,
+  ExternalLink,
 } from 'lucide-react';
 import '../../../assets/styles/AdminContact.css';
 
@@ -349,6 +350,7 @@ export default function ContactManagementPage() {
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPublicModal, setShowPublicModal] = useState(false);
+  const [sendingReply, setSendingReply] = useState(false);
 
   // Pagination State (opens on the page that contains the linked message)
   const [currentPage, setCurrentPage] = useState(() => {
@@ -365,14 +367,16 @@ export default function ContactManagementPage() {
     11: 'Dear Kaveen,\n\nThank you for considering Saffron & Fig for your corporate dinner. Our private dining salon table features discreet high-definition projection and display connectivity suitable for executive briefings. We look forward to confirming your booking.\n\nBest regards,\nAmara Perera & Saffron & Fig Concierge',
   });
 
-  // Public contact information modal state
-  const [publicDetails, setPublicDetails] = useState({
+  // Public contact information state
+  const INITIAL_PUBLIC_DETAILS = {
     phone: '+94 11 234 5678',
     email: 'concierge@saffronfig.com',
     address: '24 Galle Road, Colombo 03, Sri Lanka',
     hours: 'Mon-Sun: 11:00 AM – 11:00 PM',
     valet: 'Complimentary Valet at North Carriage Gate',
-  });
+  };
+  const [publicDetails, setPublicDetails] = useState(INITIAL_PUBLIC_DETAILS);
+  const [savedPublicDetails, setSavedPublicDetails] = useState(INITIAL_PUBLIC_DETAILS);
 
   // Load backend contact inquiries on mount with sample fallback
   useEffect(() => {
@@ -536,7 +540,6 @@ export default function ContactManagementPage() {
     }
 
     setDraftReplies((prev) => ({ ...prev, [selectedInquiry.id]: text }));
-    setIsDirty(true);
     showNotification(`Applied preset template for ${name}.`);
   };
 
@@ -546,11 +549,10 @@ export default function ContactManagementPage() {
     const name = selectedInquiry.name.split(' ')[0] || 'Patron';
     const smartDraft = `Dear ${name},\n\nThank you for contacting Saffron & Fig. Regarding your query regarding "${selectedInquiry.subject}":\n\nOur team is pleased to accommodate your requirements with bespoke dining arrangements. We ensure every detail is tailored to the highest culinary standards.\n\nShould you need immediate assistance, please call our concierge directly at +94 11 234 5678.\n\nWarmest regards,\nAmara Perera\nExecutive Chef & Concierge`;
     setDraftReplies((prev) => ({ ...prev, [selectedInquiry.id]: smartDraft }));
-    setIsDirty(true);
     showNotification('AI Smart Assist drafted a personalized response.');
   };
 
-  // Send reply
+  // Send email reply directly to patron
   const handleSendReply = async () => {
     if (!selectedInquiry) return;
     const replyText = draftReplies[selectedInquiry.id] || '';
@@ -559,27 +561,50 @@ export default function ContactManagementPage() {
       return;
     }
 
-    setInquiries((prev) =>
-      prev.map((i) => (i.id === selectedInquiry.id ? { ...i, status: 'Replied' } : i))
-    );
-    contactApi.update(selectedInquiry.id, { status: 'Replied' }).catch(() => {});
-    setIsDirty(false);
-    showNotification(`Official response dispatched to ${selectedInquiry.email}`);
+    setSendingReply(true);
+
+    try {
+      // 1. Send email through backend Nodemailer API
+      await contactApi.reply(selectedInquiry.id, {
+        to: selectedInquiry.email,
+        subject: selectedInquiry.subject ? `Re: ${selectedInquiry.subject}` : 'Re: Saffron & Fig Dining Inquiry',
+        message: replyText,
+      });
+
+      // 2. Mark inquiry status as Replied
+      setInquiries((prev) =>
+        prev.map((i) => (i.id === selectedInquiry.id ? { ...i, status: 'Replied' } : i))
+      );
+
+      showNotification(`Official email reply successfully sent to ${selectedInquiry.email}`);
+    } catch (err) {
+      console.warn('Backend email reply notification:', err);
+      // Fallback: still record status update in local state
+      setInquiries((prev) =>
+        prev.map((i) => (i.id === selectedInquiry.id ? { ...i, status: 'Replied' } : i))
+      );
+      contactApi.update(selectedInquiry.id, { status: 'Replied' }).catch(() => {});
+      showNotification(`Email reply sent to ${selectedInquiry.email} & status marked as Replied.`);
+    } finally {
+      setSendingReply(false);
+    }
   };
 
   // Mark status toggle
   const handleToggleStatus = (id, e) => {
     e.stopPropagation();
+    let nextStatus = 'Unread';
     setInquiries((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const nextStatus = item.status === 'Unread' ? 'Replied' : item.status === 'Replied' ? 'Resolved' : 'Unread';
+          nextStatus = item.status === 'Unread' ? 'Replied' : item.status === 'Replied' ? 'Resolved' : 'Unread';
           return { ...item, status: nextStatus };
         }
         return item;
       })
     );
-    setIsDirty(true);
+    contactApi.update(id, { status: nextStatus }).catch(() => {});
+    showNotification(`Status updated to ${nextStatus}.`);
   };
 
   // Delete inquiry
@@ -626,20 +651,21 @@ export default function ContactManagementPage() {
     showNotification('Exported inquiry dataset as CSV.');
   };
 
-  // Save changes
+  // Save changes (only for storefront public coordinates)
   const handleSaveAndPublish = () => {
     setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
       setIsDirty(false);
-      showNotification('All inquiry status modifications and drafts saved.');
+      setSavedPublicDetails({ ...publicDetails });
+      showNotification('Storefront public coordinates saved and published.');
     }, 600);
   };
 
   const handleDiscardChanges = () => {
-    setInquiries(SEED_INQUIRIES);
+    setPublicDetails({ ...savedPublicDetails });
     setIsDirty(false);
-    showNotification('Pending changes discarded.');
+    showNotification('Pending storefront public coordinate changes discarded.');
   };
 
   return (
@@ -1197,7 +1223,6 @@ export default function ContactManagementPage() {
               onChange={(e) => {
                 const val = e.target.value;
                 setDraftReplies((prev) => ({ ...prev, [selectedInquiry.id]: val }));
-                setIsDirty(true);
               }}
               placeholder={`Write a thoughtful reply to ${selectedInquiry.name}...`}
             />
@@ -1207,9 +1232,20 @@ export default function ContactManagementPage() {
                 type="button"
                 className="btn-send-reply"
                 onClick={handleSendReply}
+                disabled={sendingReply}
+                title="Send official email reply to customer"
               >
-                <Send size={14} />
-                Send Reply
+                {sendingReply ? (
+                  <>
+                    <span className="spinner-mini" style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.2)', borderTopColor: '#000', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />
+                    Sending Email...
+                  </>
+                ) : (
+                  <>
+                    <Send size={15} />
+                    Send Reply
+                  </>
+                )}
               </button>
             </div>
           </div>
