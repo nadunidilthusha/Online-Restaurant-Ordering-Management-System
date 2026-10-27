@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Card from '../../../components/common/Card';
 import Input from '../../../components/common/Input';
 import Textarea from '../../../components/common/Textarea';
@@ -8,19 +8,39 @@ import '../MenuManagement/MenuAdmin.css';
 
 export default function EditChefPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   
-  const [formData, setFormData] = useState({
-    fullName: 'Kamal Perera',
-    title: 'Executive Chef',
-    specialty: 'Clay Pot Feasts',
-    bio: 'With 20 years of experience in heritage Sri Lankan cuisine, bringing traditional village recipes to the modern table.',
-    isActive: true
-  });
-  
+  const [formData, setFormData] = useState({ fullName: '', title: '', specialty: '', bio: '', isActive: true });
+  const [existingImage, setExistingImage] = useState('');
   const [errors, setErrors] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const token = localStorage.getItem('adminToken');
+
+  useEffect(() => {
+    const fetchChef = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/chefs/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch chef details");
+        const data = await response.json();
+        
+        setFormData({
+          fullName: data.name,
+          title: data.title,
+          specialty: data.specialty,
+          bio: data.bio,
+          isActive: data.active
+        });
+        setExistingImage(data.image);
+        setPreviewUrl(data.image);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchChef();
+  }, [id]);
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -31,34 +51,70 @@ export default function EditChefPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // VALIDATION: Check if file size is strictly greater than 5MB (5 * 1024 * 1024 bytes)
       if (file.size > 5 * 1024 * 1024) {
         setErrors({ ...errors, image: "Image size must be less than 5MB" });
-        e.target.value = null; 
         return;
       }
-
+      setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       setHasChanges(true);
       if (errors.image) setErrors({ ...errors, image: null });
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const newErrors = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Name is required";
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.specialty.trim()) newErrors.specialty = "Specialty is required";
     if (!formData.bio.trim()) newErrors.bio = "Bio is required";
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) return setErrors(newErrors);
 
-    alert("Updates validated and ready to save!");
-    setErrors({});
-    setHasChanges(false);
+    try {
+      let imageUrl = existingImage;
+
+      // Only upload a new image if the user selected one
+      if (selectedFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', selectedFile);
+        const imgUploadRes = await fetch('http://localhost:5000/api/images/upload', {
+          method: 'POST', body: imageFormData
+        });
+        const imgData = await imgUploadRes.json();
+        if (!imgUploadRes.ok) throw new Error("Image upload failed");
+        imageUrl = `http://localhost:5000${imgData.url}`;
+      }
+
+      const chefData = {
+        name: formData.fullName,
+        title: formData.title,
+        specialty: formData.specialty,
+        bio: formData.bio,
+        image: imageUrl,
+        active: formData.isActive
+      };
+
+      const response = await fetch(`http://localhost:5000/api/chefs/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(chefData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update chef");
+      }
+
+      alert("Chef updated successfully!");
+      setHasChanges(false);
+      navigate('/admin/chefs');
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -119,8 +175,6 @@ export default function EditChefPage() {
           <div className="field">
             <label>Profile Image</label>
             <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/png, image/jpeg" onChange={handleImageChange} />
-            
-            {/* Added red border color logic if there is an error */}
             <div className="image-upload-box" style={{ padding: '30px', minHeight: '180px', borderColor: errors.image ? '#ef4444' : '#e5e0d8', borderWidth: '2px', borderStyle: 'dashed', cursor: 'pointer', textAlign: 'center', borderRadius: '8px' }} onClick={() => fileInputRef.current.click()}>
               {previewUrl ? (
                 <img src={previewUrl} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%', marginBottom: '16px' }} />
@@ -128,10 +182,8 @@ export default function EditChefPage() {
                 <div style={{ width: '100px', height: '100px', backgroundColor: '#e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', margin: '0 auto 16px', color: '#888', fontSize: '0.8rem' }}>500 × 500</div>
               )}
               <div style={{ fontWeight: '500', color: '#333', fontSize: '0.95rem' }}>+ Replace photo</div>
-              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888', display: 'block' }}>PNG, JPG up to 2MB</small>
+              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888', display: 'block' }}>PNG, JPG up to 5MB</small>
             </div>
-            
-            {/* Added this line to actually display the red error message */}
             {errors.image && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '8px', display: 'block' }}>{errors.image}</span>}
           </div>
         </div>
@@ -141,7 +193,7 @@ export default function EditChefPage() {
         <div className="sticky-bottom-bar">
           <span>You have unsaved changes</span>
           <div className="sticky-actions">
-            <Button variant="outline" onClick={() => setHasChanges(false)}>Discard changes</Button>
+            <Button variant="outline" onClick={() => navigate('/admin/chefs')}>Discard changes</Button>
             <Button variant="primary" onClick={handleSave}>Save & update profile</Button>
           </div>
         </div>

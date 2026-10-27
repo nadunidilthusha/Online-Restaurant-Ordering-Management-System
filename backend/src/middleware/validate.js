@@ -3,7 +3,9 @@ export const validate = (schema) => (req, res, next) => {
     schema.parse(req.body);
     next();
   } catch (error) {
-    // Send back the first validation error message to the frontend
-    return res.status(400).json({ error: error.errors[0].message });
+    // Safely handle Zod errors whether they use .errors or .issues
+    const issues = error.errors || error.issues;
+    const message = issues && issues.length > 0 ? issues[0].message : 'Validation failed';
+    return res.status(400).json({ error: message });
   }
 };
