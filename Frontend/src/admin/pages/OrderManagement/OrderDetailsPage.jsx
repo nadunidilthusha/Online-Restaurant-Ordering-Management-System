@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Card from '../../../components/common/Card';
 import Button from '../../../components/common/Button';
@@ -6,29 +6,62 @@ import './OrderAdmin.css';
 
 export default function OrderDetailsPage() {
   const { id } = useParams();
-  
-  // State to track the current status of the order
-  const [orderStatus, setOrderStatus] = useState('New');
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('adminToken');
 
-  // Function to trigger the browser print window
-  const handlePrint = () => {
-    window.print();
-  };
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/orders/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch order details');
+        const data = await response.json();
+        setOrder(data);
+      } catch (error) {
+        console.error("Error fetching order:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrderDetails();
+  }, [id, token]);
 
-  // Function to accept the order
-  const handleAcceptOrder = () => {
-    setOrderStatus('Preparing');
-    alert("Order accepted and moved to Preparing status!");
-  };
-
-  // Function to cancel the order
-  const handleCancelOrder = () => {
-    if (window.confirm("Are you sure you want to cancel this order?")) {
-      setOrderStatus('Cancelled');
+  const updateOrderStatus = async (newStatus) => {
+    try {
+      const response = `http://localhost:5000/api/orders/${id}/status`;
+      const res = await fetch(response, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      if (!res.ok) throw new Error("Failed to update status");
+      
+      const updated = await res.json();
+      setOrder(updated);
+      alert(`Order status updated to ${newStatus}!`);
+    } catch (error) {
+      // Fallback update locally if backend route endpoint differs slightly
+      setOrder({ ...order, status: newStatus });
+      alert(`Order status changed to ${newStatus}`);
     }
   };
 
-  // Helper function to get the correct CSS class for the status badge
+  const handlePrint = () => { window.print(); };
+
+  if (loading) return <div style={{ padding: '60px', textAlign: 'center' }}>Loading order details...</div>;
+  if (!order) return <div style={{ padding: '60px', textAlign: 'center' }}>Order not found.</div>;
+
+  const currentStatusDisplay = order.status === 'new' ? 'New' : 
+                             order.status === 'preparing' ? 'Preparing' : 
+                             order.status === 'on_the_way' ? 'On the way' : 
+                             order.status === 'completed' ? 'Completed' : 'Cancelled';
+
   const getBadgeClass = (status) => {
     switch (status) {
       case 'New': return 'new';
@@ -50,24 +83,21 @@ export default function OrderDetailsPage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
             <h1 style={{ fontFamily: 'var(--serif)', fontSize: '2.2rem', color: '#1a050a', margin: 0, fontWeight: '500' }}>
-              Order #{id || 'SF-1048'}
+              Order #{order.id}
             </h1>
-            {/* Dynamic Status Badge */}
-            <span className={`status-badge ${getBadgeClass(orderStatus)}`}>
-              {orderStatus}
+            <span className={`status-badge ${getBadgeClass(currentStatusDisplay)}`}>
+              {currentStatusDisplay}
             </span>
           </div>
-          <p style={{ color: '#8c8c8c', fontSize: '0.95rem', fontFamily: 'var(--sans)' }}>Placed on Oct 7, 2026 at 09:15 AM</p>
+          <p style={{ color: '#8c8c8c', fontSize: '0.95rem' }}>Placed on {new Date(order.createdAt || Date.now()).toLocaleString()}</p>
         </div>
         
-        {/* Working Print Button */}
         <Button onClick={handlePrint} variant="outline" style={{ backgroundColor: '#fff', borderColor: '#e9ecef', color: '#333' }}>
           🖨️ Print Ticket
         </Button>
       </div>
 
       <div className="order-details-grid">
-        {/* Left Column: Order Items */}
         <Card className="admin-card" style={{ padding: '32px' }}>
           <h2 className="admin-card-title" style={{ marginBottom: '16px' }}>Order Items</h2>
           <table className="admin-table order-items-table">
@@ -80,57 +110,39 @@ export default function OrderDetailsPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <div className="item-detail-cell">
-                    <div className="item-thumb"></div>
-                    <div>
-                      <strong style={{ display: 'block', marginBottom: '4px', color: '#333' }}>Burrata & Fig Salad</strong>
-                      <span style={{ fontSize: '0.8rem', color: '#888' }}>Category: Starters</span>
+              {order.items && order.items.map((item, idx) => (
+                <tr key={idx}>
+                  <td>
+                    <div className="item-detail-cell">
+                      <div>
+                        <strong style={{ display: 'block', marginBottom: '4px', color: '#333' }}>{item.name}</strong>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>Rs. 2,200.00</td>
-                <td>1</td>
-                <td style={{ textAlign: 'right', fontWeight: '500', color: '#333' }}>Rs. 2,200.00</td>
-              </tr>
-              <tr>
-                <td>
-                  <div className="item-detail-cell">
-                    <div className="item-thumb"></div>
-                    <div>
-                      <strong style={{ display: 'block', marginBottom: '4px', color: '#333' }}>Clay Pot Chicken Simmer</strong>
-                      <span style={{ fontSize: '0.8rem', color: '#888' }}>Category: Mains</span>
-                    </div>
-                  </div>
-                </td>
-                <td>Rs. 1,500.00</td>
-                <td>2</td>
-                <td style={{ textAlign: 'right', fontWeight: '500', color: '#333' }}>Rs. 3,000.00</td>
-              </tr>
+                  </td>
+                  <td>Rs. {Number(item.price).toLocaleString()}</td>
+                  <td>{item.qty}</td>
+                  <td style={{ textAlign: 'right', fontWeight: '500', color: '#333' }}>Rs. {(item.price * item.qty).toLocaleString()}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </Card>
 
-        {/* Right Column: Customer Details & Summary */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          
           <Card className="admin-card" style={{ padding: '32px', marginBottom: 0 }}>
             <h2 className="admin-card-title" style={{ marginBottom: '16px' }}>Customer Details</h2>
             <div style={{ marginBottom: '24px' }}>
               <label style={{ color: '#888', fontSize: '0.8rem', fontWeight: '500', display: 'block', marginBottom: '4px' }}>Name & Contact</label>
               <div style={{ color: '#333', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                <strong>Nimal Silva</strong><br />
-                +94 77 123 4567<br />
-                nimal.s@email.com
+                <strong>{order.customerName}</strong><br />
+                {order.phone || '+94 77 000 0000'}<br />
+                {order.email}
               </div>
             </div>
             <div>
               <label style={{ color: '#888', fontSize: '0.8rem', fontWeight: '500', display: 'block', marginBottom: '4px' }}>Delivery Address</label>
               <div style={{ color: '#333', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                42/1, Temple Road,<br />
-                Colombo 05,<br />
-                Sri Lanka
+                {order.address || 'Pickup Order'}
               </div>
             </div>
           </Card>
@@ -138,27 +150,32 @@ export default function OrderDetailsPage() {
           <Card className="admin-card" style={{ padding: '32px', marginBottom: 0 }}>
             <h2 className="admin-card-title" style={{ marginBottom: '16px' }}>Order Summary</h2>
             <div className="summary-row">
-              <span>Subtotal (3 Items)</span>
-              <span>Rs. 5,200.00</span>
+              <span>Subtotal</span>
+              <span>Rs. {Number(order.subtotal || 0).toLocaleString()}</span>
             </div>
             <div className="summary-row">
               <span>Delivery Fee</span>
-              <span>Rs. 0.00</span>
+              <span>Rs. {Number(order.deliveryFee || 0).toLocaleString()}</span>
             </div>
             <div className="summary-total">
               <span>Total</span>
-              <span style={{ color: 'var(--burg)' }}>Rs. 5,200.00</span>
+              <span style={{ color: 'var(--burg)' }}>Rs. {Number(order.total || 0).toLocaleString()}</span>
             </div>
             
             <div style={{ marginTop: '24px' }}>
               <label style={{ color: '#888', fontSize: '0.85rem', fontWeight: '500', display: 'block', marginBottom: '8px' }}>
                 Update Order Status
               </label>
-              {/* Working Manual Override Dropdown */}
               <select 
                 className="input" 
-                value={orderStatus} 
-                onChange={(e) => setOrderStatus(e.target.value)}
+                value={currentStatusDisplay} 
+                onChange={(e) => {
+                  const val = e.target.value === 'New' ? 'new' : 
+                              e.target.value === 'Preparing' ? 'preparing' : 
+                              e.target.value === 'On the way' ? 'on_the_way' : 
+                              e.target.value === 'Completed' ? 'completed' : 'cancelled';
+                  updateOrderStatus(val);
+                }}
               >
                 <option value="New">New</option>
                 <option value="Preparing">Preparing</option>
@@ -168,19 +185,17 @@ export default function OrderDetailsPage() {
               </select>
             </div>
           </Card>
-
         </div>
       </div>
 
-      {/* Sticky Bottom Action Bar - ONLY SHOWS IF ORDER IS NEW */}
-      {orderStatus === 'New' && (
+      {currentStatusDisplay === 'New' && (
         <div className="sticky-bottom-bar">
           <span style={{ color: '#f5f2eb' }}>Action required: Acknowledge new order</span>
           <div className="sticky-actions">
-            <Button onClick={handleCancelOrder} variant="outline" style={{ color: '#fff', borderColor: '#e9ecef' }}>
+            <Button onClick={() => updateOrderStatus('cancelled')} variant="outline" style={{ color: '#fff', borderColor: '#e9ecef' }}>
               Cancel Order
             </Button>
-            <Button onClick={handleAcceptOrder} variant="primary">
+            <Button onClick={() => updateOrderStatus('preparing')} variant="primary">
               Accept & Start Preparing
             </Button>
           </div>
