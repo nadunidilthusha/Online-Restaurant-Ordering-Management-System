@@ -87,38 +87,6 @@ export default function OrderSummary({
           <span>📱 REAL-TIME SMS</span>
         </div>
       </div>
-
-      {/* Brigade Specialist Card */}
-      <div className="brigade-card">
-        <div className="brigade-avatar">SF</div>
-        <div className="brigade-meta">
-          <span className="brigade-tag">BRIGADE SPECIALIST</span>
-          <h4 className="brigade-name">Amara Perera</h4>
-          <p className="brigade-desc">
-            Head Chef · Wood-fire Specialist · Overseeing this evening's cellar system
-          </p>
-        </div>
-      </div>
-
-      {/* Stats Strip */}
-      <div className="stats-strip">
-        <div className="stat-item">
-          <span className="stat-num">12</span>
-          <span className="stat-title">Years Crafting</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-num">85</span>
-          <span className="stat-title">Dishes</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-num">2,400+</span>
-          <span className="stat-title">Happy Diners</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-num">4.9</span>
-          <span className="stat-title">Rating</span>
-        </div>
-      </div>
     </aside>
   );
 }

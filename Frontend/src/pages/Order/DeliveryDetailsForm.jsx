@@ -38,7 +38,7 @@ export default function DeliveryDetailsForm({
               className="form-input"
               value={formData.fullName}
               onChange={onChange}
-              placeholder="e.g. Alexander Wright"
+              placeholder="Enter your full name"
               required
             />
           </div>
@@ -52,7 +52,7 @@ export default function DeliveryDetailsForm({
               className="form-input"
               value={formData.email}
               onChange={onChange}
-              placeholder="e.g. alexander.w@example.com"
+              placeholder="Enter your email address"
               required
             />
           </div>
@@ -68,7 +68,7 @@ export default function DeliveryDetailsForm({
               className="form-input"
               value={formData.phone}
               onChange={onChange}
-              placeholder="+94 77 000 0000"
+              placeholder="e.g. +94 77 123 4567"
               required
             />
           </div>
@@ -105,7 +105,7 @@ export default function DeliveryDetailsForm({
                 className="form-input"
                 value={formData.address}
                 onChange={onChange}
-                placeholder="e.g. 48 Quai de la Tournelle / Galle Road"
+                placeholder="Enter street address"
                 required={fulfilmentType === 'delivery'}
               />
             </div>
@@ -119,7 +119,7 @@ export default function DeliveryDetailsForm({
                 className="form-input"
                 value={formData.suite}
                 onChange={onChange}
-                placeholder="e.g. Apt 4B"
+                placeholder="Apt, Suite, Floor (optional)"
               />
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function DeliveryDetailsForm({
             className="form-input"
             value={formData.deliveryWindow}
             onChange={onChange}
-            placeholder="ASAP (approx 35–45 mins dispatch)"
+            placeholder="e.g. ASAP or 7:30 PM"
           />
         </div>
 
@@ -147,7 +147,7 @@ export default function DeliveryDetailsForm({
             rows="3"
             value={formData.notes}
             onChange={onChange}
-            placeholder="Please ring building intercom #402. Saffron reduction kept separately warm if possible."
+            placeholder="Any special cooking or delivery instructions..."
           ></textarea>
         </div>
 
