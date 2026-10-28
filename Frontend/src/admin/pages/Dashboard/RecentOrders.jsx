@@ -12,7 +12,7 @@ export default function RecentOrders({ orders }) {
   const columns = [
     { key: 'id', label: 'Order', render: (o) => <b className="order-id">#{o.id}</b> },
     { key: 'customer', label: 'Customer', render: (o) => <div className="cust"><span className="mini" style={{ background: o.color }}>{initials(o.customer)}</span>{o.customer}</div> },
-    { key: 'total', label: 'Total', render: (o) => `$${Number(o.total).toFixed(2)}` },
+    { key: 'total', label: 'Total', render: (o) => `Rs. ${Number(o.total).toLocaleString()}` },
     { key: 'status', label: 'Status', render: (o) => <StatusBadge status={o.status} /> },
     { key: 'view', label: '', render: () => <button className="btn-view" onClick={() => navigate('/admin/orders')}>View</button> },
   ];

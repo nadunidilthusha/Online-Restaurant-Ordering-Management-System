@@ -30,7 +30,7 @@ export default function RevenueChart({ data }) {
           {[0, .25, .5, .75, 1].map((f) => (
             <g key={f}>
               <line x1={P.l} x2={W - P.r} y1={y(max * f)} y2={y(max * f)} stroke="#ece3d0" strokeDasharray="3 4" />
-              <text x={P.l - 10} y={y(max * f) + 4} textAnchor="end">${(max * f) / 1000}k</text>
+              <text x={P.l - 10} y={y(max * f) + 4} textAnchor="end">Rs. {(max * f) / 1000}k</text>
             </g>
           ))}
           {labels.map((t, i) => i % step === 0 && <text key={t + i} x={x(i)} y={H - 8} textAnchor="middle">{t}</text>)}

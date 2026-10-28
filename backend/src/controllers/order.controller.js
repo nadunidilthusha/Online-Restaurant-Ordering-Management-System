@@ -146,7 +146,7 @@ export const createOrder = async (req, res) => {
         data: {
           type: 'order',
           title: `New Order #${newOrder.id}`,
-          text: `${newOrder.customerName} placed an order for $${newOrder.total.toFixed(2)} (${newOrder.items.length} items).`,
+          text: `${newOrder.customerName} placed an order for Rs. ${Number(newOrder.total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${newOrder.items.length} items).`,
           link: `/admin/orders/${newOrder.id}`,
         },
       });
