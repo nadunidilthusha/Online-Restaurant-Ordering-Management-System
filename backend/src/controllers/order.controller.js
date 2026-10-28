@@ -80,21 +80,38 @@ export const createOrder = async (req, res) => {
     // Normalize status to lowercase convention (new | preparing | on_the_way | completed | cancelled)
     const normalizedStatus = status ? status.toLowerCase().replace(/\s+/g, '_') : 'new';
 
+    // Verify valid menuItemIds in database to avoid foreign key violations
+    const candidateMenuItemIds = items
+      .map((item) => parseInt(item.menuItemId || item.id, 10))
+      .filter((id) => !isNaN(id) && id > 0);
+
+    let validMenuItemIdSet = new Set();
+    if (candidateMenuItemIds.length > 0) {
+      try {
+        const foundItems = await prisma.menuItem.findMany({
+          where: { id: { in: candidateMenuItemIds } },
+          select: { id: true },
+        });
+        validMenuItemIdSet = new Set(foundItems.map((m) => m.id));
+      } catch (err) {
+        console.warn('Unable to query menuItems for FK link, continuing without FK:', err.message);
+      }
+    }
+
     // Prepare line items
     const orderItemsData = items.map((item) => {
       const price = parseFloat(item.price) || 0;
       const qty = parseInt(item.qty, 10) || 1;
       const lineTotal = item.lineTotal !== undefined ? parseFloat(item.lineTotal) : price * qty;
-      const menuItemId = item.menuItemId || item.id;
+      const candidateId = parseInt(item.menuItemId || item.id, 10);
+      const hasValidFk = !isNaN(candidateId) && validMenuItemIdSet.has(candidateId);
 
       return {
         name: item.name || 'Dish Item',
         price,
         qty,
         lineTotal,
-        ...(menuItemId && !isNaN(parseInt(menuItemId, 10))
-          ? { menuItemId: parseInt(menuItemId, 10) }
-          : {}),
+        ...(hasValidFk ? { menuItemId: candidateId } : {}),
       };
     });
 
