@@ -20,8 +20,8 @@ export default function ContactInfo() {
         </div>
         <div className="info-card-content">
           <div className="info-card-label">LOCATION &amp; ESTATE</div>
-          <h3 className="info-card-main">42 Pavilion Boulevard</h3>
-          <p className="info-card-sub">Cinnamon Gardens, Colombo 07</p>
+          <h3 className="info-card-main">24 Galle Road</h3>
+          <p className="info-card-sub">Colombo 03, Sri Lanka</p>
           <div className="info-card-link" onClick={scrollToMap} role="button" tabIndex={0}>
             View on map &amp; directions →
           </div>
@@ -38,7 +38,7 @@ export default function ContactInfo() {
         <div className="info-card-content">
           <div className="info-card-label">RESERVATIONS DESK</div>
           <h3 className="info-card-main">+94 11 234 5678</h3>
-          <p className="info-card-sub">+94 77 890 1234 (WhatsApp Direct)</p>
+          <p className="info-card-sub">+94 77 000 0000 (WhatsApp Concierge)</p>
           <a href="tel:+94112345678" className="btn-call-now">
             📞 Call Now
           </a>
@@ -56,9 +56,9 @@ export default function ContactInfo() {
         <div className="info-card-content">
           <div className="info-card-label">DIRECT INQUIRIES</div>
           <h3 className="info-card-main" style={{ fontSize: '1.1rem' }}>
-            reservations@letoile-dining.com
+            concierge@saffronfig.com
           </h3>
-          <p className="info-card-sub">events@letoile-dining.com</p>
+          <p className="info-card-sub">events@saffronfig.com</p>
         </div>
       </div>
 

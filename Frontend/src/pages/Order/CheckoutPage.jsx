@@ -82,32 +82,40 @@ export default function CheckoutPage() {
       notes: formData.notes,
       items: items.map((i) => ({
         id: i.id,
+        menuItemId: !isNaN(parseInt(i.id, 10)) ? parseInt(i.id, 10) : undefined,
         name: i.name,
-        price: i.price,
-        qty: i.qty,
-        lineTotal: i.price * i.qty,
+        price: parseFloat(i.price),
+        qty: parseInt(i.qty, 10) || 1,
+        lineTotal: parseFloat((i.price * i.qty).toFixed(2)),
       })),
       subtotal,
       deliveryFee,
       gst,
       total: grandTotal,
-      status: 'CONFIRMED',
+      status: 'new',
       createdAt: new Date().toISOString(),
     };
 
+    let placedOrder = orderData;
     try {
-      // Attempt backend persistence (FR-4.5)
-      await orderApi.create(orderData).catch(() => {
-        // Backend fallback for local dev / demo
-      });
-    } catch {
-      // Ignore network errors in preview
+      // Backend persistence (FR-4.5)
+      const res = await orderApi.create(orderData);
+      if (res && res.id) {
+        placedOrder = res;
+      }
+    } catch (err) {
+      console.warn('Backend order placement (offline fallback enabled):', err);
+      if (err.response && err.response.status === 400) {
+        alert(err.response.data?.error || 'Validation error while placing order.');
+        setIsSubmitting(false);
+        return;
+      }
     } finally {
       // Save order snapshot for confirmation screen
-      sessionStorage.setItem('lastOrder', JSON.stringify(orderData));
+      sessionStorage.setItem('lastOrder', JSON.stringify(placedOrder));
       clear();
       setIsSubmitting(false);
-      navigate(`/order/confirmation/${generatedId}`);
+      navigate(`/order/confirmation/${placedOrder.id || generatedId}`);
     }
   };
 

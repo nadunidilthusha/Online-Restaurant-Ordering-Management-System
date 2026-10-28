@@ -7,9 +7,11 @@ const router = Router();
 // Public checkout route: create new order
 router.post('/', controller.createOrder);
 
+// Allow retrieving single order for order confirmation, patron tracking, and admin inspection
+router.get('/:id', controller.getOrderById);
+
 // Admin routes: order retrieval and lifecycle management
 router.get('/', requireAdmin, controller.getAllOrders);
-router.get('/:id', requireAdmin, controller.getOrderById);
 router.put('/:id', requireAdmin, controller.updateOrder);
 router.patch('/:id/status', requireAdmin, controller.updateOrderStatus);
 router.delete('/:id', requireAdmin, controller.deleteOrder);

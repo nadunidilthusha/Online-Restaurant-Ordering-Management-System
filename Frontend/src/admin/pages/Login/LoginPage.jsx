@@ -63,7 +63,7 @@ export default function LoginPage() {
         navigate('/admin', { replace: true });
         window.location.reload();
       } else {
-        setServerError(err.response?.data?.message || 'Login failed. Please verify credentials.');
+        setServerError(err.response?.data?.error || err.response?.data?.message || 'Login failed. Please verify credentials.');
       }
     } finally {
       setLoading(false);

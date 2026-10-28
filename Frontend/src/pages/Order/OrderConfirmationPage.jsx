@@ -1,21 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/formatPrice';
+import * as orderApi from '../../api/orderApi';
 
 export default function OrderConfirmationPage() {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const saved = sessionStorage.getItem('lastOrder');
     if (saved) {
       try {
-        setOrder(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.id === orderId || !orderId)) {
+          setOrder(parsed);
+          setLoading(false);
+        }
       } catch {
         // ignore parse error
       }
     }
-  }, []);
+
+    if (orderId) {
+      orderApi
+        .getOne(orderId)
+        .then((data) => {
+          if (data && data.id) {
+            setOrder(data);
+          }
+        })
+        .catch((err) => {
+          console.warn('Backend order lookup (offline fallback preserved):', err);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [orderId]);
 
   const displayId = order?.id || orderId || 'SF-94821';
   const displayTotal = order ? order.total : 101.3;
@@ -140,31 +162,115 @@ export default function OrderConfirmationPage() {
             Live Relay Status
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '12px',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ padding: '10px', background: '#240a12', borderRadius: '4px', border: '1px solid #8c1d2f' }}>
-              <div style={{ color: '#6ee7b7', fontSize: '0.9rem', marginBottom: '4px' }}>● Complete</div>
-              <div style={{ fontSize: '0.8rem', color: '#f8f3ea', fontWeight: 500 }}>Order Received</div>
+          {order?.status === 'cancelled' ? (
+            <div style={{ padding: '16px', background: '#380a0e', border: '1px solid #ef4444', borderRadius: '4px', textAlign: 'center', color: '#fca5a5' }}>
+              ✕ This order has been cancelled by guest request or kitchen concierge.
             </div>
-            <div style={{ padding: '10px', background: '#2c121b', borderRadius: '4px', border: '1px solid #d4af6a' }}>
-              <div style={{ color: '#d4af6a', fontSize: '0.9rem', marginBottom: '4px' }}>⚡ In Progress</div>
-              <div style={{ fontSize: '0.8rem', color: '#ecd5a1', fontWeight: 600 }}>Kitchen Preparation</div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '12px',
+                textAlign: 'center',
+              }}
+            >
+              {/* Step 1: Order Received */}
+              <div style={{ padding: '10px', background: '#240a12', borderRadius: '4px', border: '1px solid #8c1d2f' }}>
+                <div style={{ color: '#6ee7b7', fontSize: '0.9rem', marginBottom: '4px' }}>● Complete</div>
+                <div style={{ fontSize: '0.8rem', color: '#f8f3ea', fontWeight: 500 }}>Order Received</div>
+              </div>
+
+              {/* Step 2: Kitchen Preparation */}
+              <div
+                style={{
+                  padding: '10px',
+                  background: ['on_the_way', 'completed'].includes(order?.status) ? '#240a12' : '#2c121b',
+                  borderRadius: '4px',
+                  border: ['on_the_way', 'completed'].includes(order?.status) ? '1px solid #8c1d2f' : '1px solid #d4af6a',
+                }}
+              >
+                <div style={{ color: ['on_the_way', 'completed'].includes(order?.status) ? '#6ee7b7' : '#d4af6a', fontSize: '0.9rem', marginBottom: '4px' }}>
+                  {['on_the_way', 'completed'].includes(order?.status) ? '● Complete' : '⚡ In Progress'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#ecd5a1', fontWeight: 600 }}>Kitchen Preparation</div>
+              </div>
+
+              {/* Step 3: Thermal Packaging */}
+              <div
+                style={{
+                  padding: '10px',
+                  background: ['on_the_way', 'completed'].includes(order?.status)
+                    ? '#240a12'
+                    : order?.status === 'preparing'
+                    ? '#2c121b'
+                    : '#191115',
+                  borderRadius: '4px',
+                  border: ['on_the_way', 'completed'].includes(order?.status)
+                    ? '1px solid #8c1d2f'
+                    : order?.status === 'preparing'
+                    ? '1px solid #d4af6a'
+                    : '1px solid transparent',
+                }}
+              >
+                <div
+                  style={{
+                    color: ['on_the_way', 'completed'].includes(order?.status)
+                      ? '#6ee7b7'
+                      : order?.status === 'preparing'
+                      ? '#d4af6a'
+                      : '#7a6e69',
+                    fontSize: '0.9rem',
+                    marginBottom: '4px',
+                  }}
+                >
+                  {['on_the_way', 'completed'].includes(order?.status)
+                    ? '● Complete'
+                    : order?.status === 'preparing'
+                    ? '⚡ In Progress'
+                    : '○ Upcoming'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#b3a8a3' }}>Thermal Packaging</div>
+              </div>
+
+              {/* Step 4: Courier Dispatch */}
+              <div
+                style={{
+                  padding: '10px',
+                  background: order?.status === 'completed'
+                    ? '#240a12'
+                    : order?.status === 'on_the_way'
+                    ? '#2c121b'
+                    : '#191115',
+                  borderRadius: '4px',
+                  border: order?.status === 'completed'
+                    ? '1px solid #8c1d2f'
+                    : order?.status === 'on_the_way'
+                    ? '1px solid #d4af6a'
+                    : '1px solid transparent',
+                }}
+              >
+                <div
+                  style={{
+                    color: order?.status === 'completed'
+                      ? '#6ee7b7'
+                      : order?.status === 'on_the_way'
+                      ? '#d4af6a'
+                      : '#7a6e69',
+                    fontSize: '0.9rem',
+                    marginBottom: '4px',
+                  }}
+                >
+                  {order?.status === 'completed'
+                    ? '● Complete'
+                    : order?.status === 'on_the_way'
+                    ? '⚡ In Transit'
+                    : '○ Upcoming'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#b3a8a3' }}>Courier Dispatch</div>
+              </div>
             </div>
-            <div style={{ padding: '10px', background: '#191115', borderRadius: '4px' }}>
-              <div style={{ color: '#7a6e69', fontSize: '0.9rem', marginBottom: '4px' }}>○ Upcoming</div>
-              <div style={{ fontSize: '0.8rem', color: '#b3a8a3' }}>Thermal Packaging</div>
-            </div>
-            <div style={{ padding: '10px', background: '#191115', borderRadius: '4px' }}>
-              <div style={{ color: '#7a6e69', fontSize: '0.9rem', marginBottom: '4px' }}>○ Upcoming</div>
-              <div style={{ fontSize: '0.8rem', color: '#b3a8a3' }}>Courier Dispatch</div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Details & Breakdown Table */}
