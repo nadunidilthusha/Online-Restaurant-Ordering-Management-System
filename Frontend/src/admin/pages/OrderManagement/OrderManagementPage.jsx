@@ -29,13 +29,16 @@ export default function OrderManagementPage() {
 
   // Helper to map backend status to CSS classes & labels
   const formatStatus = (status) => {
-    switch (status) {
-      case 'new': return { label: 'New', className: 'new' };
+    switch (status?.toLowerCase()) {
+      case 'new':
+      case 'confirm':
+      case 'confirmed': 
+        return { label: 'New', className: 'new' };
       case 'preparing': return { label: 'Preparing', className: 'preparing' };
       case 'on_the_way': return { label: 'On the way', className: 'ontheway' };
       case 'completed': return { label: 'Completed', className: 'completed' };
       case 'cancelled': return { label: 'Cancelled', className: 'cancelled' };
-      default: return { label: status, className: 'new' };
+      default: return { label: status || 'New', className: 'new' };
     }
   };
 

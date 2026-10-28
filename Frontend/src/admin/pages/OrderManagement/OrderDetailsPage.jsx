@@ -46,7 +46,6 @@ export default function OrderDetailsPage() {
       setOrder(updated);
       alert(`Order status updated to ${newStatus}!`);
     } catch (error) {
-      // Fallback update locally if backend route endpoint differs slightly
       setOrder({ ...order, status: newStatus });
       alert(`Order status changed to ${newStatus}`);
     }
@@ -57,10 +56,12 @@ export default function OrderDetailsPage() {
   if (loading) return <div style={{ padding: '60px', textAlign: 'center' }}>Loading order details...</div>;
   if (!order) return <div style={{ padding: '60px', textAlign: 'center' }}>Order not found.</div>;
 
-  const currentStatusDisplay = order.status === 'new' ? 'New' : 
-                             order.status === 'preparing' ? 'Preparing' : 
-                             order.status === 'on_the_way' ? 'On the way' : 
-                             order.status === 'completed' ? 'Completed' : 'Cancelled';
+  const stat = order.status?.toLowerCase();
+  const currentStatusDisplay = 
+      (stat === 'new' || stat === 'confirm' || stat === 'confirmed') ? 'New' : 
+      stat === 'preparing' ? 'Preparing' : 
+      stat === 'on_the_way' ? 'On the way' : 
+      stat === 'completed' ? 'Completed' : 'Cancelled';
 
   const getBadgeClass = (status) => {
     switch (status) {
