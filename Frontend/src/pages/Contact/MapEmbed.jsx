@@ -1,12 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import * as contactApi from '../../api/contactApi';
 
 export default function MapEmbed() {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [info, setInfo] = useState({
+    address: '24 Galle Road, Colombo 03, Sri Lanka',
+    valet: 'Complimentary valet parking available at west entrance',
+  });
+
+  useEffect(() => {
+    contactApi
+      .getInfo()
+      .then((data) => {
+        if (data && data.address) {
+          setInfo(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleShare = () => {
-    navigator.clipboard?.writeText('Saffron & Fig, 24 Galle Road, Colombo 03');
+    navigator.clipboard?.writeText(`Saffron & Fig, ${info.address}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -25,7 +41,7 @@ export default function MapEmbed() {
         </div>
         <div className="valet-badge">
           <span>🅿</span>
-          <span>Complimentary valet parking available at west entrance</span>
+          <span>{info.valet || 'Complimentary valet parking available'}</span>
         </div>
       </div>
 
@@ -133,7 +149,7 @@ export default function MapEmbed() {
         <div className="map-beacon">
           <div className="beacon-pulse"></div>
           <div className="beacon-label">
-            <strong>Saffron &amp; Fig</strong> · 24 Galle Road, Colombo 03
+            <strong>Saffron &amp; Fig</strong> · {info.address}
           </div>
         </div>
 
@@ -143,11 +159,11 @@ export default function MapEmbed() {
             <h4 className="mfc-name">Saffron &amp; Fig</h4>
             <span className="mfc-rating">★ 4.9 (1,240+)</span>
           </div>
-          <p className="mfc-addr">24 Galle Road, Colombo 03</p>
+          <p className="mfc-addr">{info.address}</p>
 
           <div className="mfc-actions">
             <a
-              href="https://maps.google.com/?q=24+Galle+Road+Colombo+03"
+              href={`https://maps.google.com/?q=${encodeURIComponent(info.address || '24 Galle Road Colombo 03')}`}
               target="_blank"
               rel="noreferrer"
               className="mfc-btn"

@@ -4,8 +4,12 @@ import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
-// Public route: submit contact / inquiry message
+// Public routes
 router.post('/', controller.createMessage);
+router.get('/info', controller.getContactInfo);
+
+// Admin routes: storefront contact coordinates
+router.put('/info', requireAdmin, controller.updateContactInfo);
 
 // Admin routes: retrieve and manage contact inquiries
 router.get('/', requireAdmin, controller.getAllMessages);
