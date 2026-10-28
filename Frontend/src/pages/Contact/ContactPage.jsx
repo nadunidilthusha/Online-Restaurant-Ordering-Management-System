@@ -30,26 +30,6 @@ export default function ContactPage() {
           <ContactInfo />
         </div>
 
-        {/* Full-width Stats Counter Strip */}
-        <div className="contact-stats-banner">
-          <div className="cs-item">
-            <span className="cs-num">12</span>
-            <span className="cs-label">Years of Cooking</span>
-          </div>
-          <div className="cs-item">
-            <span className="cs-num">85</span>
-            <span className="cs-label">Dishes on Menu</span>
-          </div>
-          <div className="cs-item">
-            <span className="cs-num">2,400+</span>
-            <span className="cs-label">Happy Diners</span>
-          </div>
-          <div className="cs-item">
-            <span className="cs-num">4.9</span>
-            <span className="cs-label">Average Rating</span>
-          </div>
-        </div>
-
         {/* Interactive Location / Map Section */}
         <MapEmbed />
 
@@ -65,13 +45,6 @@ export default function ContactPage() {
             </p>
           </div>
           <div className="bespoke-actions">
-            <button
-              type="button"
-              className="btn-deck"
-              onClick={() => alert('Event Deck request dispatched to sommelier.')}
-            >
-              Request Event Deck
-            </button>
             <a href="tel:+94112345678" className="btn-host-line">
               Direct Host Line
             </a>

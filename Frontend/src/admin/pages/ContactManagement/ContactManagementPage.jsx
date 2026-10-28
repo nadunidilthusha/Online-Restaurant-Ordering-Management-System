@@ -31,6 +31,43 @@ const getRelativeDate = (daysAgo) => {
   return d.toISOString().slice(0, 10);
 };
 
+const formatRelativeTime = (dateString) => {
+  if (!dateString) return 'Just now';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Just now';
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+const formatDetailedTimestamp = (dateString) => {
+  if (!dateString) return 'Recent via Storefront Contact Form';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Recent via Storefront Contact Form';
+  return (
+    date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }) + ' via Storefront Contact Form'
+  );
+};
+
 const SEED_DAYS_AGO = {
   1: 0,
   2: 0,
@@ -417,8 +454,8 @@ export default function ContactManagementPage() {
             snippet: (item.subject || 'Inquiry').slice(0, 16) + '...',
             subSnippet: (item.message || '').slice(0, 12) + '...',
             message: item.message || 'No message provided',
-            received: 'Just now',
-            receivedTimestamp: 'Recent via Storefront Form',
+            received: item.createdAt ? formatRelativeTime(item.createdAt) : item.received || 'Just now',
+            receivedTimestamp: item.createdAt ? formatDetailedTimestamp(item.createdAt) : item.receivedTimestamp || 'Recent via Storefront Form',
             date: item.createdAt ? item.createdAt.slice(0, 10) : item.date || getRelativeDate(0),
             status: item.status || 'Unread',
           }));
@@ -512,7 +549,6 @@ export default function ContactManagementPage() {
   // Counts for KPIs
   const totalInquiries = inquiries.length;
   const unreadCount = inquiries.filter((i) => i.status === 'Unread').length;
-  const reservationCount = inquiries.filter((i) => i.category === 'Group Booking').length + 37;
 
   // Handle single check
   const handleToggleRow = (id, e) => {
@@ -758,20 +794,6 @@ export default function ContactManagementPage() {
           <div className="contact-kpi-body">
             <span className="contact-kpi-num danger">{unreadCount}</span>
             <span className="contact-kpi-subtext">Require response</span>
-          </div>
-        </div>
-
-        {/* Card 3: Reservation Requests */}
-        <div className="contact-kpi-card">
-          <div className="contact-kpi-head">
-            <span className="contact-kpi-label">RESERVATION REQUESTS</span>
-            <div className="contact-kpi-icon-wrap">
-              <Calendar size={18} />
-            </div>
-          </div>
-          <div className="contact-kpi-body">
-            <span className="contact-kpi-num">{reservationCount}</span>
-            <span className="contact-kpi-subtext">6 for this weekend</span>
           </div>
         </div>
       </div>

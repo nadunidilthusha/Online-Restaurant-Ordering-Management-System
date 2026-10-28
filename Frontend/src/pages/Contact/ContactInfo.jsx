@@ -65,7 +65,6 @@ export default function ContactInfo() {
         <div className="info-card-content">
           <div className="info-card-label">RESERVATIONS DESK</div>
           <h3 className="info-card-main">{info.phone}</h3>
-          <p className="info-card-sub">{info.hours ? `Hours: ${info.hours}` : '+94 77 000 0000 (WhatsApp Concierge)'}</p>
           <a href={`tel:${info.phone.replace(/\s+/g, '')}`} className="btn-call-now">
             📞 Call Now
           </a>
@@ -87,28 +86,6 @@ export default function ContactInfo() {
               {info.email}
             </a>
           </h3>
-          <p className="info-card-sub">{info.valet || 'Complimentary Valet at North Carriage Gate'}</p>
-        </div>
-      </div>
-
-      {/* 4. Kitchen Host Desk */}
-      <div className="info-card" style={{ borderLeft: '3px solid var(--wine)' }}>
-        <div className="info-card-icon" style={{ background: '#240a12', color: '#ecd5a1' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2a5 5 0 0 1 5 5c0 1.5-.6 2.8-1.5 3.7.3.7.5 1.5.5 2.3v1H8v-1c0-.8.2-1.6.5-2.3C7.6 9.8 7 8.5 7 7a5 5 0 0 1 5-5z"></path>
-            <rect x="6" y="16" width="12" height="6" rx="2"></rect>
-          </svg>
-        </div>
-        <div className="info-card-content">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-            <span className="info-card-label">KITCHEN HOST DESK</span>
-            <span className="chef-badge">
-              <span className="pulse-dot"></span>
-              Active On Floor
-            </span>
-          </div>
-          <h3 className="info-card-main">Amara Perera</h3>
-          <p className="info-card-sub">Head Chef &amp; Woodfire Specialist</p>
         </div>
       </div>
     </div>
