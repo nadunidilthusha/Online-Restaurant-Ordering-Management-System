@@ -37,7 +37,7 @@ export default function RevenueChart({ data }) {
           <path d={`${line} L${x(values.length - 1)} ${H - P.b} L${P.l} ${H - P.b}Z`} fill="url(#areaGrad)" />
           <path d={line} fill="none" stroke="#8c1d2f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           {values.map((n, i) => (
-            <circle key={i} cx={x(i)} cy={y(n)} r="4" fill="#fff" stroke="#8c1d2f" strokeWidth="2"><title>{`${labels[i]}: $${n.toLocaleString()}`}</title></circle>
+            <circle key={i} cx={x(i)} cy={y(n)} r="4" fill="#fff" stroke="#8c1d2f" strokeWidth="2"><title>{`${labels[i]}: Rs. ${n.toLocaleString()}`}</title></circle>
           ))}
         </svg>
       </div>
