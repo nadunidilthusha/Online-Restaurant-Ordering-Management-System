@@ -1,12 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import * as contactApi from '../../api/contactApi';
 
 export default function ContactInfo() {
+  const [info, setInfo] = useState({
+    phone: '+94 11 234 5678',
+    email: 'concierge@saffronfig.com',
+    address: '24 Galle Road, Colombo 03, Sri Lanka',
+    hours: 'Mon-Sun: 11:00 AM – 11:00 PM',
+    valet: 'Complimentary Valet at North Carriage Gate',
+  });
+
+  useEffect(() => {
+    contactApi
+      .getInfo()
+      .then((data) => {
+        if (data && data.phone) {
+          setInfo(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch live contact coordinates:', err);
+      });
+  }, []);
+
   const scrollToMap = () => {
     const el = document.getElementById('interactive-map');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Helper to split address if needed
+  const addressParts = (info.address || '24 Galle Road, Colombo 03, Sri Lanka').split(',');
+  const mainAddress = addressParts[0] ? addressParts[0].trim() : '24 Galle Road';
+  const subAddress = addressParts.slice(1).join(',').trim() || 'Colombo 03, Sri Lanka';
 
   return (
     <div className="contact-info-list">
@@ -20,8 +47,8 @@ export default function ContactInfo() {
         </div>
         <div className="info-card-content">
           <div className="info-card-label">LOCATION &amp; ESTATE</div>
-          <h3 className="info-card-main">24 Galle Road</h3>
-          <p className="info-card-sub">Colombo 03, Sri Lanka</p>
+          <h3 className="info-card-main">{mainAddress}</h3>
+          <p className="info-card-sub">{subAddress}</p>
           <div className="info-card-link" onClick={scrollToMap} role="button" tabIndex={0}>
             View on map &amp; directions →
           </div>
@@ -37,9 +64,9 @@ export default function ContactInfo() {
         </div>
         <div className="info-card-content">
           <div className="info-card-label">RESERVATIONS DESK</div>
-          <h3 className="info-card-main">+94 11 234 5678</h3>
-          <p className="info-card-sub">+94 77 000 0000 (WhatsApp Concierge)</p>
-          <a href="tel:+94112345678" className="btn-call-now">
+          <h3 className="info-card-main">{info.phone}</h3>
+          <p className="info-card-sub">{info.hours ? `Hours: ${info.hours}` : '+94 77 000 0000 (WhatsApp Concierge)'}</p>
+          <a href={`tel:${info.phone.replace(/\s+/g, '')}`} className="btn-call-now">
             📞 Call Now
           </a>
         </div>
@@ -55,10 +82,12 @@ export default function ContactInfo() {
         </div>
         <div className="info-card-content">
           <div className="info-card-label">DIRECT INQUIRIES</div>
-          <h3 className="info-card-main" style={{ fontSize: '1.1rem' }}>
-            concierge@saffronfig.com
+          <h3 className="info-card-main" style={{ fontSize: '1.05rem', wordBreak: 'break-all' }}>
+            <a href={`mailto:${info.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {info.email}
+            </a>
           </h3>
-          <p className="info-card-sub">events@saffronfig.com</p>
+          <p className="info-card-sub">{info.valet || 'Complimentary Valet at North Carriage Gate'}</p>
         </div>
       </div>
 

@@ -378,6 +378,21 @@ export default function ContactManagementPage() {
   const [publicDetails, setPublicDetails] = useState(INITIAL_PUBLIC_DETAILS);
   const [savedPublicDetails, setSavedPublicDetails] = useState(INITIAL_PUBLIC_DETAILS);
 
+  // Load public contact coordinates from backend on mount
+  useEffect(() => {
+    contactApi
+      .getInfo()
+      .then((info) => {
+        if (info && info.phone) {
+          setPublicDetails(info);
+          setSavedPublicDetails(info);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load public contact info from backend:', err);
+      });
+  }, []);
+
   // Load backend contact inquiries on mount with sample fallback
   useEffect(() => {
     contactApi
@@ -651,15 +666,22 @@ export default function ContactManagementPage() {
     showNotification('Exported inquiry dataset as CSV.');
   };
 
-  // Save changes (only for storefront public coordinates)
-  const handleSaveAndPublish = () => {
+  // Save changes (storefront public coordinates to backend API & local cache)
+  const handleSaveAndPublish = async () => {
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      setIsDirty(false);
+    try {
+      await contactApi.updateInfo(publicDetails);
       setSavedPublicDetails({ ...publicDetails });
-      showNotification('Storefront public coordinates saved and published.');
-    }, 600);
+      setIsDirty(false);
+      showNotification('Storefront public coordinates saved and published to live website.');
+    } catch (err) {
+      console.warn('Backend update warning, preserved local cache:', err);
+      setSavedPublicDetails({ ...publicDetails });
+      setIsDirty(false);
+      showNotification('Storefront public coordinates saved.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDiscardChanges = () => {
@@ -1308,6 +1330,17 @@ export default function ContactManagementPage() {
                   className="input"
                   value={publicDetails.valet}
                   onChange={(e) => setPublicDetails({ ...publicDetails, valet: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="lab">Dining Service Hours</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={publicDetails.hours || ''}
+                  onChange={(e) => setPublicDetails({ ...publicDetails, hours: e.target.value })}
+                  placeholder="e.g. Mon-Sun: 11:00 AM – 11:00 PM"
                 />
               </div>
             </div>

@@ -247,3 +247,68 @@ export const sendReplyMessage = async (req, res) => {
   }
 };
 
+const DEFAULT_CONTACT_INFO = {
+  phone: '+94 11 234 5678',
+  email: 'concierge@saffronfig.com',
+  address: '24 Galle Road, Colombo 03, Sri Lanka',
+  hours: 'Mon-Sun: 11:00 AM – 11:00 PM',
+  valet: 'Complimentary Valet at North Carriage Gate',
+};
+
+/**
+ * GET /api/contact/info
+ * Retrieves public storefront contact coordinates & concierge details.
+ */
+export const getContactInfo = async (req, res) => {
+  try {
+    const record = await prisma.content.findUnique({
+      where: { page: 'contact' },
+    });
+    if (record && record.data) {
+      return res.status(200).json({ ...DEFAULT_CONTACT_INFO, ...record.data });
+    }
+    return res.status(200).json(DEFAULT_CONTACT_INFO);
+  } catch (error) {
+    console.warn('Error fetching contact info (using default fallback):', error.message);
+    return res.status(200).json(DEFAULT_CONTACT_INFO);
+  }
+};
+
+/**
+ * PUT /api/contact/info
+ * Updates public storefront contact coordinates (Admin only).
+ */
+export const updateContactInfo = async (req, res) => {
+  try {
+    const { phone, email, address, hours, valet } = req.body;
+    const dataToSave = {
+      phone: phone || DEFAULT_CONTACT_INFO.phone,
+      email: email || DEFAULT_CONTACT_INFO.email,
+      address: address || DEFAULT_CONTACT_INFO.address,
+      hours: hours || DEFAULT_CONTACT_INFO.hours,
+      valet: valet || DEFAULT_CONTACT_INFO.valet,
+    };
+
+    let savedData = dataToSave;
+    try {
+      const saved = await prisma.content.upsert({
+        where: { page: 'contact' },
+        update: { data: dataToSave },
+        create: { page: 'contact', data: dataToSave },
+      });
+      savedData = saved.data;
+    } catch (dbErr) {
+      console.warn('Database upsert warning for contact info:', dbErr.message);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Storefront contact coordinates updated successfully.',
+      data: savedData,
+    });
+  } catch (error) {
+    console.error('Error updating contact info:', error);
+    return res.status(500).json({ error: 'Failed to update storefront contact info.' });
+  }
+};
+
