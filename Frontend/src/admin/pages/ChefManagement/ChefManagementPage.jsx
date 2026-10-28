@@ -65,6 +65,9 @@ export default function ChefManagementPage() {
       imageFormData.append('image', selectedFile);
       const imgUploadRes = await fetch('http://localhost:5000/api/images/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: imageFormData
       });
       const imgData = await imgUploadRes.json();
@@ -76,7 +79,7 @@ export default function ChefManagementPage() {
         title: formData.title,
         specialty: formData.specialty,
         bio: formData.bio,
-        image: `http://localhost:5000${imgData.url}`,
+        image: imgData.url,
         active: true
       };
 
@@ -179,6 +182,9 @@ export default function ChefManagementPage() {
                       src={chef.image} 
                       alt={chef.name} 
                       style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} 
+                      onError={(e) => {
+                        e.target.src = `https://ui-avatars.com/api/?name=${chef.name.charAt(0)}&background=e5e0d8&color=555`;
+                      }}
                     />
                   ) : (
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: '0.8rem', fontWeight: 'bold' }}>

@@ -79,11 +79,15 @@ export default function EditChefPage() {
         const imageFormData = new FormData();
         imageFormData.append('image', selectedFile);
         const imgUploadRes = await fetch('http://localhost:5000/api/images/upload', {
-          method: 'POST', body: imageFormData
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: imageFormData
         });
         const imgData = await imgUploadRes.json();
         if (!imgUploadRes.ok) throw new Error("Image upload failed");
-        imageUrl = `http://localhost:5000${imgData.url}`;
+        imageUrl = imgData.url;
       }
 
       const chefData = {

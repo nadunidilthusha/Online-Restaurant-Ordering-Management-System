@@ -23,13 +23,14 @@ import EditChefPage from '../admin/pages/ChefManagement/EditChefPage';
 import MenuManagementPage from '../admin/pages/MenuManagement/MenuManagementPage';
 import EditMenuPage from '../admin/pages/MenuManagement/EditMenuPage';
 import OrderManagementPage from '../admin/pages/OrderManagement/OrderManagementPage';
-import OrderDetailsPage from '../admin/pages/OrderManagement/OrderDetailsPage'; // <-- Added Order Details Import
+import OrderDetailsPage from '../admin/pages/OrderManagement/OrderDetailsPage';
 import ContactManagementPage from '../admin/pages/ContactManagement/ContactManagementPage';
 import ImageManagementPage from '../admin/pages/ImageManagement/ImageManagementPage';
 
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Public Routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
@@ -42,8 +43,10 @@ export default function AppRoutes() {
         <Route path="/contact" element={<ContactPage />} />
       </Route>
 
+      {/* Admin Login */}
       <Route path="/admin/login" element={<LoginPage />} />
 
+      {/* Protected Admin Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
@@ -55,12 +58,13 @@ export default function AppRoutes() {
           <Route path="menu" element={<MenuManagementPage />} />
           <Route path="menu/:id/edit" element={<EditMenuPage />} />
           <Route path="orders" element={<OrderManagementPage />} />
-          <Route path="orders/:id" element={<OrderDetailsPage />} /> {/* <-- Added Order Details Route */}
+          <Route path="orders/:id" element={<OrderDetailsPage />} /> 
           <Route path="contact" element={<ContactManagementPage />} />
           <Route path="images" element={<ImageManagementPage />} />
         </Route>
       </Route>
 
+      {/* 404 Fallback */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
