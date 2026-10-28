@@ -62,6 +62,9 @@ export default function MenuManagementPage() {
       imageFormData.append('image', selectedImage);
       const imgUploadRes = await fetch('http://localhost:5000/api/images/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: imageFormData
       });
       const imgData = await imgUploadRes.json();
@@ -73,7 +76,7 @@ export default function MenuManagementPage() {
         price: Number(formData.price),
         category: formData.category,
         description: formData.description,
-        image: `http://localhost:5000${imgData.url}`,
+        image: imgData.url,
         available: true
       };
 

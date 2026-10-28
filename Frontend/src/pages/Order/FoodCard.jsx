@@ -5,6 +5,11 @@ import { formatPrice } from '../../utils/formatPrice';
 export default function FoodCard({ item }) {
   const { addItem } = useCart();
   const [justAdded, setJustAdded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const description = item.description || item.desc || "";
+  // If the description is longer than ~75 characters, it likely gets cut off
+  const isLongDescription = description.length > 75;
 
   const handleAddToCart = () => {
     addItem({
@@ -12,13 +17,12 @@ export default function FoodCard({ item }) {
       name: item.name,
       price: item.price,
       image: item.image,
-      desc: item.desc,
+      description: description, 
       tag: item.tag,
       tagType: item.tagType,
       note: item.note,
     });
     
-    // Trigger the exact same checkmark animation as the home page
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);
   };
@@ -33,13 +37,51 @@ export default function FoodCard({ item }) {
             e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80';
           }}
         />
-        {/* Render the tag if it exists in the menu data */}
         {item.tag && <span className={`dish-tag cat-${item.tagType}`}>{item.tag}</span>}
       </div>
       
       <div className="dish-body">
         <h3>{item.name}</h3>
-        <p>{item.desc}</p>
+        
+        <div>
+          <p style={{ 
+            color: '#666666', 
+            fontSize: '0.85rem', 
+            lineHeight: '1.5', 
+            margin: '8px 0 4px 0',
+            // If expanded, show normally. If not, clamp to 2 lines.
+            ...(isExpanded ? {} : {
+                display: '-webkit-box',
+                WebkitLineClamp: '2', 
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+            })
+          }}>
+            {description}
+          </p>
+          
+          {/* The Clickable Toggle Icon/Text */}
+          {isLongDescription && (
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--wine)',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                padding: '0',
+                marginBottom: '12px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              {isExpanded ? 'Show less ▲' : 'Read more ▼'}
+            </button>
+          )}
+        </div>
         
         <div className="dish-foot">
           <span className="price">{formatPrice(item.price)}</span>
