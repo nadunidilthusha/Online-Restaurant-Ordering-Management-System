@@ -17,22 +17,21 @@ export default function CheckoutPage() {
     decrease,
     removeItem,
     clear,
-    resetToDefault,
   } = useCart();
 
   // Fulfilment mode: 'express' | 'pickup' | 'dinein'
   const [fulfilmentMode, setFulfilmentMode] = useState('express');
 
-  // Patron & dispatch details pre-filled from luxury mockup
+  // Patron & dispatch details
   const [formData, setFormData] = useState({
-    fullName: 'Alexander Wright',
-    email: 'alexander.w@example.com',
-    phone: '+94 77 000 0000',
+    fullName: '',
+    email: '',
+    phone: '',
     orderType: 'delivery',
-    address: '48 Quai de la Tournelle',
-    suite: 'Apt 4B',
-    deliveryWindow: 'ASAP (approx 35–45 mins dispatch)',
-    notes: 'Please ring building intercom #402. Saffron reduction kept separately warm if possible.',
+    address: '',
+    suite: '',
+    deliveryWindow: '',
+    notes: '',
   });
 
   const [toast, setToast] = useState('');
@@ -151,33 +150,6 @@ export default function CheckoutPage() {
             Review your artisanal selection, customize your culinary preferences, and provide delivery or table coordinates for this evening's tasting.
           </p>
         </header>
-
-        {/* 3-Step Process Stepper */}
-        <div className="checkout-stepper">
-          <div className="step-card active">
-            <span className="step-number">1</span>
-            <div className="step-meta">
-              <span className="step-label">CURRENT PHASE</span>
-              <span className="step-title">Cart &amp; Preferences</span>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <span className="step-number">2</span>
-            <div className="step-meta">
-              <span className="step-label">LOGISTICS</span>
-              <span className="step-title">Delivery Details</span>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <span className="step-number">3</span>
-            <div className="step-meta">
-              <span className="step-label">CULINARY DISPATCH</span>
-              <span className="step-title">Payment &amp; Confirmation</span>
-            </div>
-          </div>
-        </div>
 
         {/* Fulfilment Mode Selector */}
         <div className="fulfilment-modes">
@@ -308,14 +280,6 @@ export default function CheckoutPage() {
                 <div style={{ textAlign: 'center', padding: '40px 20px', color: '#7a6e69' }}>
                   <p style={{ marginBottom: '16px', fontSize: '1.05rem' }}>Your dining cart is currently empty.</p>
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                    <button
-                      type="button"
-                      className="btn-update-patron"
-                      onClick={resetToDefault}
-                      style={{ background: '#240a12' }}
-                    >
-                      Restore Sample Tasting Menu
-                    </button>
                     <Link to="/order" className="btn-update-patron">
                       Browse Menu
                     </Link>

@@ -78,15 +78,15 @@ function reducer(items, action) {
 export function CartProvider({ children }) {
   const [items, dispatch] = useReducer(reducer, [], () => {
     const saved = sessionStorage.getItem('cart');
-    if (saved) {
+    if (saved !== null) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       } catch {
         // ignore parse error
       }
     }
-    return DEFAULT_CART_ITEMS;
+    return [];
   });
 
   useEffect(() => {
