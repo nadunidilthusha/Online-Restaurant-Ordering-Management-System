@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Card from '../../../components/common/Card';
 import Input from '../../../components/common/Input';
 import Select from '../../../components/common/Select';
@@ -9,20 +9,39 @@ import './MenuAdmin.css';
 
 export default function EditMenuPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   
-  // Initialize with mock data for the edit screen
-  const [formData, setFormData] = useState({
-    dishName: 'Fire-roasted Sea Bass',
-    price: '3500',
-    category: 'Mains',
-    description: 'Fresh catch served with local herbs, handmade daily by our chefs over open fire.',
-    isActive: true
-  });
-  
+  const [formData, setFormData] = useState({ dishName: '', price: '', category: 'Mains', description: '', isActive: true });
+  const [existingImage, setExistingImage] = useState('');
   const [errors, setErrors] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const token = localStorage.getItem('adminToken');
+
+  useEffect(() => {
+    const fetchMenuItem = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/menu/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch menu details");
+        const data = await response.json();
+        
+        setFormData({
+          dishName: data.name,
+          price: data.price,
+          category: data.category,
+          description: data.description,
+          isActive: data.available
+        });
+        setExistingImage(data.image);
+        setPreviewUrl(data.image);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchMenuItem();
+  }, [id]);
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -33,33 +52,68 @@ export default function EditMenuPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // VALIDATION: Check if file size is strictly greater than 5MB (5 * 1024 * 1024 bytes)
       if (file.size > 5 * 1024 * 1024) {
         setErrors({ ...errors, image: "Image size must be less than 5MB" });
-        e.target.value = null; 
         return;
       }
-
+      setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       setHasChanges(true);
       if (errors.image) setErrors({ ...errors, image: null });
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const newErrors = {};
     if (!formData.dishName.trim()) newErrors.dishName = "Dish name cannot be empty";
     if (!formData.price || formData.price <= 0) newErrors.price = "Enter a valid price";
     if (!formData.description.trim()) newErrors.description = "Description cannot be empty";
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) return setErrors(newErrors);
 
-    alert("Updates validated and ready to save!");
-    setErrors({});
-    setHasChanges(false);
+    try {
+      let imageUrl = existingImage;
+
+      if (selectedFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', selectedFile);
+        const imgUploadRes = await fetch('http://localhost:5000/api/images/upload', {
+          method: 'POST', body: imageFormData
+        });
+        const imgData = await imgUploadRes.json();
+        if (!imgUploadRes.ok) throw new Error("Image upload failed");
+        imageUrl = `http://localhost:5000${imgData.url}`;
+      }
+
+      const menuItemData = {
+        name: formData.dishName,
+        price: Number(formData.price),
+        category: formData.category,
+        description: formData.description,
+        image: imageUrl,
+        available: formData.isActive
+      };
+
+      const response = await fetch(`http://localhost:5000/api/menu/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(menuItemData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update menu item");
+      }
+
+      alert("Dish updated successfully!");
+      setHasChanges(false);
+      navigate('/admin/menu');
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -125,10 +179,8 @@ export default function EditMenuPage() {
                 <div style={{ width: '80px', height: '80px', backgroundColor: '#f1f3f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', margin: '0 auto 16px', color: '#adb5bd', fontSize: '0.8rem' }}>120 × 120</div>
               )}
               <div style={{ fontWeight: '500', color: '#333', fontSize: '0.95rem' }}>+ Replace Image</div>
-              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888', display: 'block' }}>PNG, JPG up to 2MB</small>
+              <small style={{ marginTop: '6px', fontSize: '0.75rem', color: '#888', display: 'block' }}>PNG, JPG up to 5MB</small>
             </div>
-            
-            {/* Display the red error message if the file is too large */}
             {errors.image && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '8px', display: 'block' }}>{errors.image}</span>}
           </div>
         </div>
@@ -138,7 +190,7 @@ export default function EditMenuPage() {
         <div className="sticky-bottom-bar">
           <span>You have unsaved changes</span>
           <div className="sticky-actions">
-            <Button variant="outline" onClick={() => setHasChanges(false)} style={{ color: 'var(--ink)', backgroundColor: '#fff', borderColor: '#e9ecef' }}>Discard changes</Button>
+            <Button variant="outline" onClick={() => navigate('/admin/menu')} style={{ color: 'var(--ink)', backgroundColor: '#fff', borderColor: '#e9ecef' }}>Discard changes</Button>
             <Button variant="primary" onClick={handleSave}>Save & update dish</Button>
           </div>
         </div>

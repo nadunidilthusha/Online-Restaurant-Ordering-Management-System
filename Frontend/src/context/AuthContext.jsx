@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     // DEV ONLY: set VITE_DEV_BYPASS_AUTH=true in .env to view the admin UI without a backend
     if (import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') {
+      localStorage.setItem('adminToken', 'demo-amara-token');
       setAdmin({ name: 'Amara Perera', email: 'amara.perera@saffronfig.com', role: 'ADMINISTRATOR' });
       return setLoading(false);
     }
