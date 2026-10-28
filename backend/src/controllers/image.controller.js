@@ -4,6 +4,11 @@ import path from 'path';
 
 const prisma = new PrismaClient();
 
+// The database keeps "/uploads/<file>". The admin page runs on another port (5173),
+// so send back the full address; otherwise the preview cannot load right after uploading.
+const fullUrl = (req, url) =>
+  `${(process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '')}${url}`;
+
 // Upload image
 export const uploadImage = async (req, res) => {
   try {
@@ -26,7 +31,7 @@ export const uploadImage = async (req, res) => {
       },
     });
 
-    res.status(201).json(newImage);
+    res.status(201).json({ ...newImage, url: fullUrl(req, newImage.url) }); // <-- changed
   } catch (error) {
     console.error('Error uploading image:', error);
     res.status(500).json({ error: 'Failed to upload image' });
@@ -71,7 +76,7 @@ export const replaceImage = async (req, res) => {
       },
     });
 
-    res.status(200).json(updatedImage);
+    res.status(200).json({ ...updatedImage, url: fullUrl(req, updatedImage.url) }); // <-- changed
   } catch (error) {
     console.error('Error replacing image:', error);
     res.status(500).json({ error: 'Failed to replace image' });
