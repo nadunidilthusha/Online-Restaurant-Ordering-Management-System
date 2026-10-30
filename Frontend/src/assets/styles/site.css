@@ -57,10 +57,10 @@
 .dish:hover .dish-img { transform: translateY(-6px); box-shadow: 0 24px 40px rgba(42,11,19,.22); }
 .dish-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .9s; }
 .dish:hover .dish-img img { transform: scale(1.1); }
-.dish-tag { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: #3a1019; color: var(--gold-2); font-size: .78rem; letter-spacing: .08em; padding: .3rem 1rem; border-radius: 2px; white-space: nowrap; }
-.dish-tag.cat-Mains { background: var(--wine); color: #fff; }
-.dish-tag.cat-Starters { background: var(--emerald); color: #fff; }
-.dish-tag.cat-Desserts { background: var(--saffron); color: #2b1606; }
+.dish-img .dish-tag { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: #3a1019; color: var(--gold-2); font-size: .78rem; letter-spacing: .08em; padding: .3rem 1rem; border-radius: 2px; white-space: nowrap; }
+.dish-img .dish-tag.cat-Mains { background: var(--wine); color: #fff; }
+.dish-img .dish-tag.cat-Starters { background: var(--emerald); color: #fff; }
+.dish-img .dish-tag.cat-Desserts { background: var(--saffron); color: #2b1606; }
 .dish-body { padding: 1.4rem .2rem 0; text-align: center; display: flex; flex-direction: column; gap: .4rem; }
 .dish-body h3 { font-family: var(--serif); font-weight: 600; font-size: 1.6rem; color: var(--burg); line-height: 1.2; }
 .dish-body p { color: #5b5254; font-size: .95rem; }

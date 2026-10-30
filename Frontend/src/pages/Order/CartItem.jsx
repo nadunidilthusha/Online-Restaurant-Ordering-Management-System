@@ -19,11 +19,6 @@ export default function CartItem({ item, onIncrease, onDecrease, onRemove }) {
       />
 
       <div className="dish-info">
-        {item.tag && (
-          <span className={`dish-tag ${item.tagType || 'popular'}`}>
-            {item.tag}
-          </span>
-        )}
         <h4 className="dish-name">{item.name}</h4>
         {item.desc && <p className="dish-desc">{item.desc}</p>}
         {item.note && <p className="dish-note">{item.note}</p>}
