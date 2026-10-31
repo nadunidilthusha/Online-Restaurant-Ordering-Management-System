@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { MENU_POOL } from '../data/defaultContent.js';
 
 const prisma = new PrismaClient();
 
@@ -30,31 +31,42 @@ export const createMenuItem = async (req, res) => {
 export const getAllMenuItems = async (req, res) => {
   try {
     const items = await prisma.menuItem.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
-    res.status(200).json(items);
+    if (items && items.length > 0) {
+      return res.status(200).json(items);
+    }
   } catch (error) {
-    console.error('Error fetching menu items:', error);
-    res.status(500).json({ error: 'Failed to fetch menu items' });
+    console.warn('Database error while fetching menu items (using default MENU_POOL fallback):', error.message);
   }
+  return res.status(200).json(
+    MENU_POOL.map((item) => ({
+      ...item,
+      available: item.available !== false,
+      price: parseFloat(item.price),
+    }))
+  );
 };
 
 // Get menu by ID
 export const getMenuItemById = async (req, res) => {
+  const { id } = req.params;
+  const numId = parseInt(id, 10);
   try {
-    const { id } = req.params;
     const item = await prisma.menuItem.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: numId },
     });
-    
-    if (!item) {
-      return res.status(404).json({ error: 'Menu item not found' });
+    if (item) {
+      return res.status(200).json(item);
     }
-    res.status(200).json(item);
   } catch (error) {
-    console.error('Error fetching menu item:', error);
-    res.status(500).json({ error: 'Failed to fetch menu item' });
+    console.warn('Database error while fetching menu item by ID (using fallback):', error.message);
   }
+  const fallbackItem = MENU_POOL.find((m) => m.id === numId);
+  if (fallbackItem) {
+    return res.status(200).json({ ...fallbackItem, available: true });
+  }
+  return res.status(404).json({ error: 'Menu item not found' });
 };
 
 // Update menu

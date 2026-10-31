@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import CategoryTabs from './CategoryTabs';
 import FoodCard from './FoodCard';
 import { useCart } from '../../hooks/useCart';
+import { MENU_POOL } from '../../data/sampleContent';
 import '../../assets/styles/Menu.css';
 
 export default function MenuPage() {
@@ -17,13 +18,17 @@ export default function MenuPage() {
         const response = await fetch('http://localhost:5000/api/menu');
         if (!response.ok) throw new Error('Failed to fetch menu');
         const data = await response.json();
-        // Only show available items
-        setMenuItems(data.filter(item => item.available));
+        if (Array.isArray(data) && data.length > 0) {
+          setMenuItems(data.filter((item) => item.available));
+          return;
+        }
       } catch (error) {
-        console.error('Error fetching menu:', error);
+        console.warn('Live menu fetch failed, using fallback menu:', error);
       } finally {
         setLoading(false);
       }
+      // Fallback
+      setMenuItems(MENU_POOL.map((item) => ({ ...item, available: true })));
     };
     fetchMenu();
   }, []);

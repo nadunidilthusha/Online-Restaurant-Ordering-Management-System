@@ -42,14 +42,23 @@ const toStoredUrls = (data, req) => {
 
 // reads a page from the database; creates it from the defaults the very first time
 const loadPage = async (page) => {
-  const row = await prisma.content.findUnique({ where: { page } });
-  if (row) return row.data;
-  const created = await prisma.content.upsert({
-    where: { page },
-    update: {},
-    create: { page, data: DEFAULTS[page] },
-  });
-  return created.data;
+  try {
+    const row = await prisma.content.findUnique({ where: { page } });
+    if (row && row.data) return row.data;
+  } catch (err) {
+    console.warn(`Database unreachable for page ${page} (using defaults):`, err.message);
+    return DEFAULTS[page];
+  }
+  try {
+    const created = await prisma.content.upsert({
+      where: { page },
+      update: {},
+      create: { page, data: DEFAULTS[page] },
+    });
+    return created.data;
+  } catch {
+    return DEFAULTS[page];
+  }
 };
 
 // GET /api/content/:page   (public: used by the customer Home and About pages)

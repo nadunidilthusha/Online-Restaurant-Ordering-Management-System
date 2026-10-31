@@ -6,6 +6,8 @@ import { formatPrice } from '../../utils/formatPrice';
 import SafeImage from '../../components/common/SafeImage';
 import EmptyState from '../../components/common/EmptyState';
 
+import { MENU_POOL } from '../../data/sampleContent';
+
 // dishes = the featured list chosen in Admin > Home management (order + visible flag)
 export default function FeaturedDishes({ dishes = [] }) {
   const { addItem } = useCart();
@@ -21,12 +23,16 @@ export default function FeaturedDishes({ dishes = [] }) {
         const response = await fetch('http://localhost:5000/api/menu');
         if (!response.ok) throw new Error('Failed to fetch menu');
         const data = await response.json();
-        setMenu(data.filter((item) => item.available));
+        if (Array.isArray(data) && data.length > 0) {
+          setMenu(data.filter((item) => item.available));
+          return;
+        }
       } catch (error) {
-        console.error('Error fetching menu:', error);
+        console.warn('Error fetching live menu in FeaturedDishes, using fallback:', error);
       } finally {
         setLoading(false);
       }
+      setMenu(MENU_POOL.map((item) => ({ ...item, available: true })));
     };
     fetchMenu();
   }, []);
